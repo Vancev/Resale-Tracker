@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { UserContext } from "../providors/UserProvider";
 import {auth} from "../firebase";
+
 const ProfilePage = () => {
   const user = useContext(UserContext);
   const {photoURL, displayName, email} = user;
