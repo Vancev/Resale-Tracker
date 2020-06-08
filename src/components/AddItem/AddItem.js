@@ -10,7 +10,7 @@ import { FormControl } from "@material-ui/core";
 import { firestore } from "../../firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CreatableSelect from "react-select/lib/Creatable";
+import PlatformSelect from 'react-select';
 import useStyles from "./AddItem.style";
 import { UserContext } from "../../providors/UserProvider";
 
@@ -24,7 +24,7 @@ export default function AddItem() {
   const [buyerShipping, setBuyerShipping] = useState("");
   const [shippingCost, setShippingCost] = useState("");
   //Single platform chosen
-  const [soldPlatform, setSoldPlatform] = useState("");
+  const [soldPlatform, setSoldPlatform] = useState({});
   const [profit, setProfit] = React.useState(0);
 
   const user = useContext(UserContext);
@@ -36,7 +36,7 @@ export default function AddItem() {
     setSoldCost("");
     setBuyerShipping("");
     setShippingCost("");
-    setSoldPlatform("");
+    setSoldPlatform({});
     setProfit(0);
   }
 
@@ -47,16 +47,18 @@ export default function AddItem() {
   useEffect(() => {
     //Add platforms from firestore to local state
     firestore
-    .collection("Users")
-    .doc(user.uid)
-    .collection("SoldLocation")
+    .collection("SoldPlatforms")
       .get()
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
+          console.log(doc)
           let item = {
-            label: doc.data().location,
-            value: doc.data().location,
+            label: doc.data().platform,
+            value: doc.data().platform,
+            platformPercentFee: doc.data().platformPercentFee,
+            paymentPercentFee: doc.data().paymentPercentFee,
+            paymentFixedFee: doc.data().paymentFixedFee
           };
           tempItems.push(item);
         });
@@ -65,46 +67,47 @@ export default function AddItem() {
       });
   }, []);
 
-  useEffect(() => {
-    firestore
-    .collection("Users")
-    .doc(user.uid)
-    .collection("SoldLocation")
-      .get()
-      .then((data) => {
-        let tempItems = [];
-        data.forEach((doc) => {
-          let item = {
-            label: doc.data().location,
-            value: doc.data().location,
-          };
-          tempItems.push(item);
-        });
-        console.log(tempItems);
-        setSoldPlatforms(tempItems);
-      });
-  }, [addedPlatform]);
+  //In future for users to add custom platforms
+  // useEffect(() => {
+  //   firestore
+  //   .collection("Users")
+  //   .doc(user.uid)
+  //   .collection("SoldLocation")
+  //     .get()
+  //     .then((data) => {
+  //       let tempItems = [];
+  //       data.forEach((doc) => {
+  //         let item = {
+  //           label: doc.data().location,
+  //           value: doc.data().location,
+  //         };
+  //         tempItems.push(item);
+  //       });
+  //       console.log(tempItems);
+  //       setSoldPlatforms(tempItems);
+  //     });
+  // }, [addedPlatform]);
 
-  function setNewPlatform(newPlatform) {
-    if (newPlatform !== "") {
-      //Add new item to firestore
-      firestore
-      .collection("Users")
-      .doc(user.uid)
-      .collection("SoldLocation")
-        .add({
-          location: newPlatform,
-        })
-        .then(function (docRef) {
-          //TODO: Use this ID to delete documents. Find out where to store ID.
-          console.log("Document written with ID: ", docRef.id);
-        })
-        .catch(function (error) {
-          console.error("Error adding document: ", error);
-        });
-    }
-    setAddedPlatform(true);
-  }
+  // function setNewPlatform(newPlatform) {
+  //   if (newPlatform !== "") {
+  //     //Add new item to firestore
+  //     firestore
+  //     .collection("Users")
+  //     .doc(user.uid)
+  //     .collection("SoldLocation")
+  //       .add({
+  //         location: newPlatform,
+  //       })
+  //       .then(function (docRef) {
+  //         //TODO: Use this ID to delete documents. Find out where to store ID.
+  //         console.log("Document written with ID: ", docRef.id);
+  //       })
+  //       .catch(function (error) {
+  //         console.error("Error adding document: ", error);
+  //       });
+  //   }
+  //   setAddedPlatform(true);
+  // }
 
   function addItem(e) {
     let soldBool = null;
@@ -140,9 +143,11 @@ export default function AddItem() {
     }
     if (sold === "true") {
       let profit;
-      switch (soldPlatform) {
+      console.log(soldPlatform)
+      console.log(soldPlatform.platform)
+      switch (soldPlatform.platform) {
         case "Mecari":
-          let fee = parseFloat(soldCost) * 0.1;
+          let fee = parseFloat(soldCost) * soldPlatform.platformPercentFee;
           profit =
             parseFloat(soldCost || 0) -
             parseFloat(cost || 0) -
@@ -153,7 +158,7 @@ export default function AddItem() {
           break;
         case "Ebay":
           break;
-        case "Local":
+        case "OfferUp - Local" || "Craigslist" || "Local - Other":
           profit =
             parseFloat(soldCost || 0) -
             parseFloat(cost || 0) -
@@ -181,7 +186,7 @@ export default function AddItem() {
           soldCost: soldCost,
           shippingCost: shippingCost,
           buyerShipping: buyerShipping,
-          soldPlatform: soldPlatform,
+          soldPlatform: soldPlatform.platform,
           profit: profit,
         })
         .then(function (docRef) {
@@ -282,17 +287,24 @@ export default function AddItem() {
                     </div>
                     <div>
                       <div>
-                        <CreatableSelect
+                        {/* <CreatableSelect to allow creation */}
+                        <PlatformSelect
                           options={soldPlatforms}
                           placeholder="Selling Platform"
-                          isClearable
+                          //isClearable
                           onChange={(opt, meta) => {
-                            setSoldPlatform(opt.value);
-                            if (meta.action === "create-option") {
-                              setNewPlatform(opt.value);
-                              console.log(opt);
+                            let platform = {
+                              platform: opt.value,
+                              platformPercentFee: opt.platformPercentFee,
+                              paymentPercentFee: opt.paymentPercentFee,
+                              paymentFixedFee: opt.paymentFixedFee
                             }
-                            console.log(opt);
+                            console.log(platform)
+                            setSoldPlatform(platform)
+                            // if (meta.action === "create-option") {
+                            //   setNewPlatform(opt.value);
+                            //   console.log(opt);
+                            // }
                           }}
                         />
                       </div>
@@ -316,6 +328,12 @@ export default function AddItem() {
                         </FormControl>
                       </GridItem> */}
                     </div>
+                    <div>
+                  </div>
+                      {soldPlatform.platform === "Ebay" ? (
+                        <p>hello</p>
+                      ) : null
+                      }
                   </div>
                 ) : null}
               </div>
