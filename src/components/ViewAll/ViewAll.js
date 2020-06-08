@@ -99,10 +99,10 @@ export default function TableList() {
   //Columns to display
   const [state, setState] = React.useState({
     columns: [
-      { title: "Name", field: "itemName" },
-      { title: "Bought From", field: "boughtFrom" },
-      { title: "Cost", field: "itemCost", type: "numeric" },
-      { title: "Sold", field: "Sold", type: "boolean" },
+      { title: "Name", field: "name" },
+      { title: "Bought From", field: "bought" },
+      { title: "Cost", field: "cost", type: "numeric" },
+      { title: "Sold", field: "sold", type: "boolean" },
       { title: "Profit", field: "profit", type: "numeric" },
     ],
   });
@@ -134,7 +134,7 @@ export default function TableList() {
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
-          console.log(doc.data());
+          console.log(doc.data().soldPlatform);
           let item = {
             name: doc.data().itemName,
             bought: doc.data().boughtFrom,
