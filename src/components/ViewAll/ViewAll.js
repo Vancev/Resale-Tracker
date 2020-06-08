@@ -18,6 +18,11 @@ import Select from "@material-ui/core/Select";
 import CreatableSelect from "react-select/lib/Creatable";
 import { UserContext } from "../../providors/UserProvider";
 import PlatformSelect from "react-select";
+import FormLabel from '@material-ui/core/FormLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const styles = {
   cardCategoryWhite: {
@@ -80,13 +85,24 @@ export default function TableList() {
   const [soldPlatforms, setSoldPlatforms] = React.useState();
   const [addedPlatform, setAddedPlatform] = React.useState(false);
 
+  const [ebayCategory, setEbayCategory] = React.useState(["", false]);
+  const [ebayCategories, setEbayCategories] = React.useState();
+  const [ebayOther, setEbayOther] = React.useState([{
+    store: false,
+    topRated: false,
+    managedPayment: false,
+    internationalPayment: false,
+    promotedListing: false,
+  }, false]);
+  const [adRate, setAdRate] = React.useState(["", false]);
+
   //Columns to display
   const [state, setState] = React.useState({
     columns: [
-      { title: "Name", field: "name" },
-      { title: "Bought From", field: "bought" },
-      { title: "Cost", field: "cost", type: "numeric" },
-      { title: "Sold", field: "sold", type: "boolean" },
+      { title: "Name", field: "itemName" },
+      { title: "Bought From", field: "boughtFrom" },
+      { title: "Cost", field: "itemCost", type: "numeric" },
+      { title: "Sold", field: "Sold", type: "boolean" },
       { title: "Profit", field: "profit", type: "numeric" },
     ],
   });
@@ -118,7 +134,7 @@ export default function TableList() {
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
-            console.log(doc.data().soldPlatform)
+          console.log(doc.data());
           let item = {
             name: doc.data().itemName,
             bought: doc.data().boughtFrom,
@@ -145,12 +161,26 @@ export default function TableList() {
           let item = {
             label: doc.data().platform,
             value: doc.data().platform,
-            platformPercentFee: doc.data().platformPercentFee,
-            paymentPercentFee: doc.data().paymentPercentFee,
-            paymentFixedFee: doc.data().paymentFixedFee,
+            fee: doc.data(),
           };
           tempItems.push(item);
+          if (doc.data().platform == "Ebay") {
+            let tempCategories = [];
+            doc.data().ebayCategory.map((category) => {
+              let tempCategory = {
+                label: category.CategoryName,
+                value: category.CategoryName,
+                categoryFee: category.CategoryFee,
+                maxFee: category.MaxFee,
+              };
+              tempCategories.push(tempCategory);
+              console.log(category.CategoryName);
+            });
+            setEbayCategories(tempCategories);
+            console.log(tempCategories);
+          }
         });
+        console.log(tempItems);
         setSoldPlatforms(tempItems);
       });
   }, []);
@@ -303,7 +333,7 @@ export default function TableList() {
       }
       console.log(soldPlatform[0]);
       if (soldBool === true) {
-        let fees = soldPlatforms.find(({value}) => value === soldPlatform[0])
+        let fees = soldPlatforms.find(({ value }) => value === soldPlatform[0]);
         let tempProfit;
         if (profit[1] === true) {
           tempProfit = profit[0];
@@ -311,9 +341,7 @@ export default function TableList() {
           switch (soldPlatform[0]) {
             case "Mecari":
               let fee =
-                parseFloat(soldCost[0]) *
-                fees.platformPercentFee *
-                0.01;
+                parseFloat(soldCost[0]) * fees.fee.platformPercentFee * 0.01;
               tempProfit =
                 parseFloat(soldCost[0] || 0) -
                 parseFloat(cost[0] || 0) -
@@ -323,7 +351,7 @@ export default function TableList() {
               break;
             case "Ebay":
               break;
-            case "Local":
+            case "Local - Other" || "Craigslist" || "OfferUp - Local":
               tempProfit =
                 parseFloat(soldCost[0] || 0) -
                 parseFloat(cost[0] || 0) -
@@ -340,7 +368,7 @@ export default function TableList() {
           }
           setProfit([tempProfit, false]);
         }
-        console.log( shippingCost[0]);
+        console.log(shippingCost[0]);
         firestore
           .collection("Users")
           .doc(user.uid)
@@ -371,6 +399,9 @@ export default function TableList() {
     }
   };
 
+  const handelCheckedChange = (event) => {
+      setEbayOther([{...ebayOther[0], [event.target.name]: event.target.checked}, true])
+  }
   //   function setNewPlatform(newPlatform) {
   //     if (newPlatform !== "") {
   //       //Add new item to firestore
@@ -475,21 +506,14 @@ export default function TableList() {
               <option value={"true"}>True</option>
             </Select>
           </FormControl>
-          {/* TODO: Set Payment information in row click */}
           {sold[0] === "true" || sold[0] == true ? (
             <div>
               <PlatformSelect
                 options={soldPlatforms}
-                placeholder={soldPlatform[0]|| "Selling Platform"}
+                placeholder={soldPlatform[0] || "Selling Platform"}
                 //isClearable
                 onChange={(opt, meta) => {
-                console.log(opt)
-                  let platform = {
-                    platform: opt.value,
-                    platformPercentFee: opt.platformPercentFee,
-                    paymentPercentFee: opt.paymentPercentFee,
-                    paymentFixedFee: opt.paymentFixedFee,
-                  };
+                  console.log(opt);
                   setSoldPlatform([opt.value, true]);
                   // if (meta.action === "create-option") {
                   //   setNewPlatform(opt.value);
@@ -538,6 +562,99 @@ export default function TableList() {
                 type="profit"
                 fullWidth
               />
+
+              {soldPlatform[0] == "Ebay" ? (
+                <div>
+                  <PlatformSelect
+                    options={ebayCategories}
+                    placeholder={ebayCategory[0] || "Ebay Item Category"}
+                    //isClearable
+                    onChange={(opt, meta) => {
+                      console.log(opt);
+                      setEbayCategory([opt.value, true]);
+                      // if (meta.action === "create-option") {
+                      //   setNewPlatform(opt.value);
+                      //   console.log(opt);
+                      // }
+                    }}
+                  />
+                  <FormControl
+                    component="fieldset"
+                    className={classes.formControl}
+                  >
+                    <FormLabel component="legend">
+                      More Options
+                    </FormLabel>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={ebayOther[0].store}
+                            onChange={handelCheckedChange}
+                            name="store"
+                          />
+                        }
+                        label="eBay Store (Basic or above)"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={ebayOther[0].topRated}
+                            onChange={handelCheckedChange}
+                            name="topRated"
+                          />
+                        }
+                        label="Top Rated Seller"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={ebayOther[0].managedPayment}
+                            onChange={handelCheckedChange}
+                            name="managedPayment"
+                          />
+                        }
+                        label="Ebay Managed Payment"
+                      />
+                       <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={ebayOther[0].internationalPayment}
+                            onChange={handelCheckedChange}
+                            name="internationalPayment"
+                          />
+                        }
+                        label="International payment"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={ebayOther[0].promotedListing}
+                            onChange={handelCheckedChange}
+                            name="promotedListing"
+                          />
+                        }
+                        label="Promoted Listing"
+                      />
+                    </FormGroup>
+                  </FormControl>
+                
+                {ebayOther[0].promotedListing === true ? (
+                    <TextField
+                    autoFocus
+                    type="number"
+                    margin="dense"
+                    id="adRate"
+                    label="Promotion Ad Rate"
+                    value={adRate[0]}
+                    onChange={(e) => {
+                        setAdRate([e.target.value, true])}}
+                    type="adRate"
+                    fullWidth
+                  />
+                ) : null}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </DialogContent>
