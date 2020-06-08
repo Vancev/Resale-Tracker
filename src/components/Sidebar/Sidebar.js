@@ -56,6 +56,7 @@ function Application() {
 
   return (
     <div>
+        {/* https://reach.tech/router/api/Location */}
         <Location>
             {(props) => {
                 setCurrentRoute(props.location)
@@ -102,6 +103,7 @@ function Application() {
         </div>
         <Divider />
         <MenuList>
+            {/* https://stackoverflow.com/questions/50801093/material-ui-drawer-selection-how-to-route */}
             {routes.map((prop, key) => {
               return (
                 <Link

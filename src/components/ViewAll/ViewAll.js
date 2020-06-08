@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 // core components
 
-import {firestore} from "../../firebase";
+import { firestore } from "../../firebase";
 import MaterialTable from "material-table";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -17,6 +17,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import CreatableSelect from "react-select/lib/Creatable";
 import { UserContext } from "../../providors/UserProvider";
+import PlatformSelect from "react-select";
 
 const styles = {
   cardCategoryWhite: {
@@ -51,7 +52,7 @@ const styles = {
 const useStyles = makeStyles(styles);
 
 export default function TableList() {
-    const user = useContext(UserContext);
+  const user = useContext(UserContext);
 
   //All items directly from the Firestore
   const [items, setItems] = useState([]);
@@ -76,7 +77,7 @@ export default function TableList() {
   const [profit, setProfit] = React.useState([0, false]);
 
   //Platforms to display in the "Platform" dropdown
-  const [soldPlatforms, setSoldPlatforms] = React.useState([]);
+  const [soldPlatforms, setSoldPlatforms] = React.useState();
   const [addedPlatform, setAddedPlatform] = React.useState(false);
 
   //Columns to display
@@ -99,10 +100,10 @@ export default function TableList() {
       .collection("Items")
       .doc(oldData.id)
       .delete()
-      .then(function() {
+      .then(function () {
         console.log("Document Deleted");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error("Error removing document: ", error);
       });
   }
@@ -117,6 +118,7 @@ export default function TableList() {
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
+            console.log(doc.data().soldPlatform)
           let item = {
             name: doc.data().itemName,
             bought: doc.data().boughtFrom,
@@ -135,43 +137,43 @@ export default function TableList() {
       });
 
     firestore
-      .collection("Users")
-      .doc(user.uid)
-      .collection("SoldLocation")
+      .collection("SoldPlatforms")
       .get()
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
           let item = {
-            label: doc.data().location,
-            value: doc.data().location,
+            label: doc.data().platform,
+            value: doc.data().platform,
+            platformPercentFee: doc.data().platformPercentFee,
+            paymentPercentFee: doc.data().paymentPercentFee,
+            paymentFixedFee: doc.data().paymentFixedFee,
           };
           tempItems.push(item);
         });
-        console.log(tempItems);
         setSoldPlatforms(tempItems);
       });
   }, []);
 
-  useEffect(() => {
-    firestore
-      .collection("Users")
-      .doc(user.uid)
-      .collection("SoldLocation")
-      .get()
-      .then((data) => {
-        let tempItems = [];
-        data.forEach((doc) => {
-          let item = {
-            label: doc.data().location,
-            value: doc.data().location,
-          };
-          tempItems.push(item);
-        });
-        console.log(tempItems);
-        setSoldPlatforms(tempItems);
-      });
-  }, [addedPlatform]);
+  //   useEffect(() => {
+  //     firestore
+  //       .collection("Users")
+  //       .doc(user.uid)
+  //       .collection("SoldLocation")
+  //       .get()
+  //       .then((data) => {
+  //         let tempItems = [];
+  //         data.forEach((doc) => {
+  //           let item = {
+  //             label: doc.data().location,
+  //             value: doc.data().location,
+  //           };
+  //           tempItems.push(item);
+  //         });
+  //         console.log(tempItems);
+  //         setSoldPlatforms(tempItems);
+  //       });
+  //   }, [addedPlatform]);
 
   //Update state after an item has been deleted or modified
   useEffect(() => {
@@ -229,6 +231,7 @@ export default function TableList() {
 
   //TODO: Allow manual changing of profit
   const handleClickOpen = (rowData) => {
+    console.log(rowData.soldPlatform);
     setName([rowData.name, false]);
     setCost([rowData.cost, false]);
     setBoughtFrom([rowData.bought, false]);
@@ -236,6 +239,8 @@ export default function TableList() {
     setSoldCost([rowData.soldCost, false]);
     setBuyerShipping([rowData.buyerShipping, false]);
     setShippingCost([rowData.shippingCost, false]);
+    //SoldPlatform has data of just "Platform" and also has data of object of all fees. Fix to
+    //have one or the other. Possibly make a new var for only platforma and another for fees
     setSoldPlatform([rowData.soldPlatform, false]);
     setProfit([rowData.profit, false]);
     setID(rowData.id);
@@ -248,6 +253,7 @@ export default function TableList() {
 
   const handleSave = () => {
     //Check if any fields have been modified
+    console.log(soldPlatform);
     if (
       cost[1] == false &&
       boughtFrom[1] == false &&
@@ -275,9 +281,9 @@ export default function TableList() {
         setModified(true);
         setProfit(["", false]);
         firestore
-        .collection("Users")
-        .doc(user.uid)
-        .collection("Items")
+          .collection("Users")
+          .doc(user.uid)
+          .collection("Items")
           .doc(id)
           .update({
             Sold: soldBool,
@@ -286,23 +292,28 @@ export default function TableList() {
             itemCost: cost[0],
             itemName: name[0],
           })
-          .then(function(docRef) {
+          .then(function (docRef) {
             console.log("Document successfuly updated");
             //resetItem();
           })
-          .catch(function(error) {
+          .catch(function (error) {
             console.error("Error adding document: ", error);
             //toast.error("Error adding document: ", error);
           });
       }
+      console.log(soldPlatform[0]);
       if (soldBool === true) {
+        let fees = soldPlatforms.find(({value}) => value === soldPlatform[0])
         let tempProfit;
         if (profit[1] === true) {
           tempProfit = profit[0];
         } else {
           switch (soldPlatform[0]) {
             case "Mecari":
-              let fee = parseFloat(soldCost[0]) * 0.1;
+              let fee =
+                parseFloat(soldCost[0]) *
+                fees.platformPercentFee *
+                0.01;
               tempProfit =
                 parseFloat(soldCost[0] || 0) -
                 parseFloat(cost[0] || 0) -
@@ -329,6 +340,7 @@ export default function TableList() {
           }
           setProfit([tempProfit, false]);
         }
+        console.log( shippingCost[0]);
         firestore
           .collection("Users")
           .doc(user.uid)
@@ -345,12 +357,12 @@ export default function TableList() {
             soldPlatform: soldPlatform[0],
             profit: tempProfit,
           })
-          .then(function(docRef) {
+          .then(function (docRef) {
             console.log("Document updated");
             //toast.success("Item was added");
             //resetItem();
           })
-          .catch(function(error) {
+          .catch(function (error) {
             console.error("Error adding document: ", error);
             //toast.error("Error adding document: ", error);
           });
@@ -359,26 +371,26 @@ export default function TableList() {
     }
   };
 
-  function setNewPlatform(newPlatform) {
-    if (newPlatform !== "") {
-      //Add new item to firestore
-      firestore
-      .collection("Users")
-      .doc(user.uid)
-      .collection("SoldLocation")
-        .add({
-          location: newPlatform,
-        })
-        .then(function(docRef) {
-          //TODO: Use this ID to delete documents. Find out where to store ID.
-          console.log("Document written with ID: ", docRef.id);
-        })
-        .catch(function(error) {
-          console.error("Error adding document: ", error);
-        });
-    }
-    setAddedPlatform(true);
-  }
+  //   function setNewPlatform(newPlatform) {
+  //     if (newPlatform !== "") {
+  //       //Add new item to firestore
+  //       firestore
+  //         .collection("Users")
+  //         .doc(user.uid)
+  //         .collection("SoldLocation")
+  //         .add({
+  //           location: newPlatform,
+  //         })
+  //         .then(function (docRef) {
+  //           //TODO: Use this ID to delete documents. Find out where to store ID.
+  //           console.log("Document written with ID: ", docRef.id);
+  //         })
+  //         .catch(function (error) {
+  //           console.error("Error adding document: ", error);
+  //         });
+  //     }
+  //     setAddedPlatform(true);
+  //   }
 
   const classes = useStyles();
   return (
@@ -410,6 +422,7 @@ export default function TableList() {
         <DialogContent>
           <DialogContentText>Edit or mark your item sold.</DialogContentText>
           <TextField
+            required
             autoFocus
             margin="dense"
             id="name"
@@ -425,7 +438,7 @@ export default function TableList() {
             id="bought"
             label="Bought From"
             value={boughtFrom[0]}
-            onChange={(e) => setBoughtFrom([e.target.value, true])}
+            onChange={(e) => setBoughtFrom([e.target.value || "", true])}
             type="bought"
             fullWidth
           />
@@ -435,7 +448,7 @@ export default function TableList() {
             id="cost"
             label="Your Cost"
             value={cost[0]}
-            onChange={(e) => setCost([e.target.value, true])}
+            onChange={(e) => setCost([e.target.value || 0, true])}
             type="cost"
             fullWidth
           />
@@ -462,24 +475,31 @@ export default function TableList() {
               <option value={"true"}>True</option>
             </Select>
           </FormControl>
-
+          {/* TODO: Set Payment information in row click */}
           {sold[0] === "true" || sold[0] == true ? (
             <div>
-              <CreatableSelect
+              <PlatformSelect
                 options={soldPlatforms}
-                placeholder="Selling Platform"
-                isClearable
+                placeholder={soldPlatform[0]|| "Selling Platform"}
+                //isClearable
                 onChange={(opt, meta) => {
-                  setSoldPlatform(opt.value);
-                  if (meta.action === "create-option") {
-                    setNewPlatform(opt.value);
-                    console.log(opt);
-                  }
-                  console.log(opt);
+                console.log(opt)
+                  let platform = {
+                    platform: opt.value,
+                    platformPercentFee: opt.platformPercentFee,
+                    paymentPercentFee: opt.paymentPercentFee,
+                    paymentFixedFee: opt.paymentFixedFee,
+                  };
+                  setSoldPlatform([opt.value, true]);
+                  // if (meta.action === "create-option") {
+                  //   setNewPlatform(opt.value);
+                  //   console.log(opt);
+                  // }
                 }}
               />
               <TextField
                 autoFocus
+                required
                 margin="dense"
                 id="soldcost"
                 label="Sold Cost"
@@ -494,7 +514,7 @@ export default function TableList() {
                 id="shipping"
                 label="Your Shipping Cost"
                 value={shippingCost[0]}
-                onChange={(e) => setShippingCost([e.target.value, true])}
+                onChange={(e) => setShippingCost([e.target.value || 0, true])}
                 type="shipping"
                 fullWidth
               />
@@ -504,7 +524,7 @@ export default function TableList() {
                 id="buyershipping"
                 label="Shipping Paid by Buyer"
                 value={buyerShipping[0]}
-                onChange={(e) => setBuyerShipping([e.target.value, true])}
+                onChange={(e) => setBuyerShipping([e.target.value || 0, true])}
                 type="buyershipping"
                 fullWidth
               />
