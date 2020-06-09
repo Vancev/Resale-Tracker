@@ -18,11 +18,12 @@ import Select from "@material-ui/core/Select";
 import CreatableSelect from "react-select/lib/Creatable";
 import { UserContext } from "../../providors/UserProvider";
 import PlatformSelect from "react-select";
-import FormLabel from '@material-ui/core/FormLabel';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Checkbox from '@material-ui/core/Checkbox';
+import FormLabel from "@material-ui/core/FormLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import Checkbox from "@material-ui/core/Checkbox";
+import { CalculateProfit } from "../../functions/CalculateProfit";
 
 const styles = {
   cardCategoryWhite: {
@@ -87,22 +88,25 @@ export default function TableList() {
 
   const [ebayCategory, setEbayCategory] = React.useState(["", false]);
   const [ebayCategories, setEbayCategories] = React.useState();
-  const [ebayOther, setEbayOther] = React.useState([{
-    store: false,
-    topRated: false,
-    managedPayment: false,
-    internationalPayment: false,
-    promotedListing: false,
-  }, false]);
+  const [ebayOther, setEbayOther] = React.useState([
+    {
+      store: false,
+      topRated: false,
+      managedPayment: false,
+      internationalPayment: false,
+      promotedListing: false,
+    },
+    false,
+  ]);
   const [adRate, setAdRate] = React.useState(["", false]);
 
   //Columns to display
   const [state, setState] = React.useState({
     columns: [
-      { title: "Name", field: "name" },
-      { title: "Bought From", field: "bought" },
-      { title: "Cost", field: "cost", type: "numeric" },
-      { title: "Sold", field: "sold", type: "boolean" },
+      { title: "Name", field: "itemName" },
+      { title: "Bought From", field: "boughtFrom" },
+      { title: "Cost", field: "itemCost", type: "numeric" },
+      { title: "Sold", field: "Sold", type: "boolean" },
       { title: "Profit", field: "profit", type: "numeric" },
     ],
   });
@@ -134,19 +138,22 @@ export default function TableList() {
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
-          console.log(doc.data().soldPlatform);
-          let item = {
-            name: doc.data().itemName,
-            bought: doc.data().boughtFrom,
-            cost: doc.data().itemCost,
-            sold: doc.data().Sold,
-            profit: doc.data().profit,
-            soldPlatform: doc.data().soldPlatform,
-            soldCost: doc.data().soldCost,
-            shippingCost: doc.data().shippingCost,
-            buyerShipping: doc.data().buyerShipping,
-            id: doc.id,
-          };
+          console.log(doc.data());
+          let item = doc.data();
+          item["id"] = doc.id;
+          console.log(item);
+          //   let item = {
+          //     name: doc.data().itemName,
+          //     bought: doc.data().boughtFrom,
+          //     cost: doc.data().itemCost,
+          //     sold: doc.data().Sold,
+          //     profit: doc.data().profit,
+          //     soldPlatform: doc.data().soldPlatform,
+          //     soldCost: doc.data().soldCost,
+          //     shippingCost: doc.data().shippingCost,
+          //     buyerShipping: doc.data().buyerShipping,
+          //     id: doc.id,
+          //   };
           tempItems.push(item);
         });
         setItems(tempItems);
@@ -223,28 +230,44 @@ export default function TableList() {
               if (item.id == id) {
                 let tempItem = {};
                 if (sold[0] === false) {
-                  console.log(sold[0]);
                   tempItem = {
-                    name: name[0],
-                    bought: boughtFrom[0],
-                    cost: cost[0],
-                    sold: sold[0],
+                    itemName: name[0],
+                    boughtFrom: boughtFrom[0],
+                    itemCost: cost[0],
+                    Sold: sold[0],
                     id: id,
                   };
                 } else {
-                  console.log(sold[0]);
-                  tempItem = {
-                    soldCost: soldCost[0],
-                    buyerShipping: buyerShipping[0],
-                    shippingCost: shippingCost[0],
-                    soldPlatform: soldPlatform[0],
-                    name: name[0],
-                    bought: boughtFrom[0],
-                    cost: cost[0],
-                    sold: sold[0],
-                    profit: profit[0] || 0,
-                    id: id,
-                  };
+                  if (soldPlatform[0] == "Ebay") {
+                    tempItem = {
+                      soldCost: soldCost[0],
+                      buyerShipping: buyerShipping[0],
+                      shippingCost: shippingCost[0],
+                      soldPlatform: soldPlatform[0],
+                      itemName: name[0],
+                      boughtFrom: boughtFrom[0],
+                      itemCost: cost[0],
+                      Sold: sold[0],
+                      profit: profit[0] || 0,
+                      ebayCategory: ebayCategory[0],
+                      ebayOther: ebayOther[0],
+                      adRate: adRate[0] || "",
+                      id: id,
+                    };
+                  } else {
+                    tempItem = {
+                      soldCost: soldCost[0],
+                      buyerShipping: buyerShipping[0],
+                      shippingCost: shippingCost[0],
+                      soldPlatform: soldPlatform[0],
+                      itemName: name[0],
+                      boughtFrom: boughtFrom[0],
+                      itemCost: cost[0],
+                      Sold: sold[0],
+                      profit: profit[0] || 0,
+                      id: id,
+                    };
+                  }
                 }
                 tempItems.push(tempItem);
               } else {
@@ -261,11 +284,11 @@ export default function TableList() {
 
   //TODO: Allow manual changing of profit
   const handleClickOpen = (rowData) => {
-    console.log(rowData.soldPlatform);
-    setName([rowData.name, false]);
-    setCost([rowData.cost, false]);
-    setBoughtFrom([rowData.bought, false]);
-    setSold([rowData.sold, false]);
+    console.log(rowData);
+    setName([rowData.itemName, false]);
+    setCost([rowData.itemCost, false]);
+    setBoughtFrom([rowData.boughtFrom, false]);
+    setSold([rowData.Sold, false]);
     setSoldCost([rowData.soldCost, false]);
     setBuyerShipping([rowData.buyerShipping, false]);
     setShippingCost([rowData.shippingCost, false]);
@@ -273,6 +296,9 @@ export default function TableList() {
     //have one or the other. Possibly make a new var for only platforma and another for fees
     setSoldPlatform([rowData.soldPlatform, false]);
     setProfit([rowData.profit, false]);
+    setEbayOther([rowData.ebayOther, false]);
+    setEbayCategory([rowData.ebayCategory, false]);
+    setAdRate([rowData.adRate, false]);
     setID(rowData.id);
     setOpen(true);
   };
@@ -293,7 +319,10 @@ export default function TableList() {
       buyerShipping[1] == false &&
       shippingCost[1] == false &&
       soldPlatform[1] == false &&
-      profit[1] == false
+      profit[1] == false &&
+      ebayOther[1] == false &&
+      adRate[1] == false &&
+      ebayCategory[1] == false
     ) {
       console.log("no changes made");
       setOpen(false);
@@ -338,70 +367,87 @@ export default function TableList() {
         if (profit[1] === true) {
           tempProfit = profit[0];
         } else {
-          switch (soldPlatform[0]) {
-            case "Mecari":
-              let fee =
-                parseFloat(soldCost[0]) * fees.fee.platformPercentFee * 0.01;
-              tempProfit =
-                parseFloat(soldCost[0] || 0) -
-                parseFloat(cost[0] || 0) -
-                parseFloat(shippingCost[0] || 0) +
-                parseFloat(buyerShipping[0] || 0) -
-                parseFloat(fee || 0);
-              break;
-            case "Ebay":
-              break;
-            case "Local - Other" || "Craigslist" || "OfferUp - Local":
-              tempProfit =
-                parseFloat(soldCost[0] || 0) -
-                parseFloat(cost[0] || 0) -
-                parseFloat(shippingCost[0] || 0) +
-                parseFloat(buyerShipping[0] || 0);
-              break;
-            default:
-              tempProfit =
-                parseFloat(soldCost[0] || 0) -
-                parseFloat(cost[0] || 0) -
-                parseFloat(shippingCost[0] || 0) +
-                parseFloat(buyerShipping[0] || 0);
-              break;
-          }
+          tempProfit = CalculateProfit(
+            soldPlatform[0],
+            fees,
+            soldCost[0],
+            cost[0],
+            shippingCost[0],
+            buyerShipping[0],
+            ebayCategory[0],
+            ebayOther[0],
+            adRate[0]
+          );
+
           setProfit([tempProfit, false]);
         }
-        console.log(shippingCost[0]);
-        firestore
-          .collection("Users")
-          .doc(user.uid)
-          .collection("Items")
-          .doc(id)
-          .update({
-            Sold: soldBool,
-            boughtFrom: boughtFrom[0],
-            itemCost: cost[0],
-            itemName: name[0],
-            soldCost: soldCost[0],
-            shippingCost: shippingCost[0],
-            buyerShipping: buyerShipping[0],
-            soldPlatform: soldPlatform[0],
-            profit: tempProfit,
-          })
-          .then(function (docRef) {
-            console.log("Document updated");
-            //toast.success("Item was added");
-            //resetItem();
-          })
-          .catch(function (error) {
-            console.error("Error adding document: ", error);
-            //toast.error("Error adding document: ", error);
-          });
+        if (soldPlatform[0] === "Ebay") {
+          firestore
+            .collection("Users")
+            .doc(user.uid)
+            .collection("Items")
+            .doc(id)
+            .update({
+              Sold: soldBool,
+              boughtFrom: boughtFrom[0],
+              itemCost: cost[0],
+              itemName: name[0],
+              soldCost: soldCost[0],
+              shippingCost: shippingCost[0],
+              buyerShipping: buyerShipping[0],
+              soldPlatform: soldPlatform[0],
+              ebayCategory: ebayCategory[0],
+              ebayOther: ebayOther[0],
+              adRate: adRate[0] || "",
+              profit: tempProfit,
+            })
+            .then(function (docRef) {
+              console.log("Document updated");
+              //toast.success("Item was added");
+              //resetItem();
+            })
+            .catch(function (error) {
+              console.error("Error adding document: ", error);
+              //toast.error("Error adding document: ", error);
+            });
+        } else {
+          firestore
+            .collection("Users")
+            .doc(user.uid)
+            .collection("Items")
+            .doc(id)
+            .update({
+              Sold: soldBool,
+              boughtFrom: boughtFrom[0],
+              itemCost: cost[0],
+              itemName: name[0],
+              soldCost: soldCost[0],
+              shippingCost: shippingCost[0],
+              buyerShipping: buyerShipping[0],
+              soldPlatform: soldPlatform[0],
+              profit: tempProfit,
+            })
+            .then(function (docRef) {
+              console.log("Document updated");
+              //toast.success("Item was added");
+              //resetItem();
+            })
+            .catch(function (error) {
+              console.error("Error adding document: ", error);
+              //toast.error("Error adding document: ", error);
+            });
+        }
       }
       setOpen(false);
     }
   };
 
   const handelCheckedChange = (event) => {
-      setEbayOther([{...ebayOther[0], [event.target.name]: event.target.checked}, true])
-  }
+    setEbayOther([
+      { ...ebayOther[0], [event.target.name]: event.target.checked },
+      true,
+    ]);
+  };
   //   function setNewPlatform(newPlatform) {
   //     if (newPlatform !== "") {
   //       //Add new item to firestore
@@ -582,9 +628,7 @@ export default function TableList() {
                     component="fieldset"
                     className={classes.formControl}
                   >
-                    <FormLabel component="legend">
-                      More Options
-                    </FormLabel>
+                    <FormLabel component="legend">More Options</FormLabel>
                     <FormGroup>
                       <FormControlLabel
                         control={
@@ -616,7 +660,7 @@ export default function TableList() {
                         }
                         label="Ebay Managed Payment"
                       />
-                       <FormControlLabel
+                      <FormControlLabel
                         control={
                           <Checkbox
                             checked={ebayOther[0].internationalPayment}
@@ -638,21 +682,22 @@ export default function TableList() {
                       />
                     </FormGroup>
                   </FormControl>
-                
-                {ebayOther[0].promotedListing === true ? (
+
+                  {ebayOther[0].promotedListing === true ? (
                     <TextField
-                    autoFocus
-                    type="number"
-                    margin="dense"
-                    id="adRate"
-                    label="Promotion Ad Rate"
-                    value={adRate[0]}
-                    onChange={(e) => {
-                        setAdRate([e.target.value, true])}}
-                    type="adRate"
-                    fullWidth
-                  />
-                ) : null}
+                      autoFocus
+                      type="number"
+                      margin="dense"
+                      id="adRate"
+                      label="Promotion Ad Rate"
+                      value={adRate[0]}
+                      onChange={(e) => {
+                        setAdRate([e.target.value, true]);
+                      }}
+                      type="adRate"
+                      fullWidth
+                    />
+                  ) : null}
                 </div>
               ) : null}
             </div>
