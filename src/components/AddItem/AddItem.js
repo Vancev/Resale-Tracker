@@ -10,14 +10,20 @@ import { FormControl } from "@material-ui/core";
 import { firestore } from "../../firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import PlatformSelect from 'react-select';
+import PlatformSelect from "react-select";
 import useStyles from "./AddItem.style";
 import { UserContext } from "../../providors/UserProvider";
+import FormLabel from "@material-ui/core/FormLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import Checkbox from "@material-ui/core/Checkbox";
+import { CalculateProfit } from "../../functions/CalculateProfit";
 
 //TODO Add createable select to TableList
 export default function AddItem() {
   const [cost, setCost] = useState("");
-  const [boughgtFrom, setBoughtFrom] = useState("");
+  const [boughtFrom, setBoughtFrom] = useState("");
   const [sold, setSold] = useState("false");
   const [name, setName] = useState("");
   const [soldCost, setSoldCost] = useState("");
@@ -26,6 +32,17 @@ export default function AddItem() {
   //Single platform chosen
   const [soldPlatform, setSoldPlatform] = useState({});
   const [profit, setProfit] = React.useState(0);
+
+  const [ebayCategories, setEbayCategories] = React.useState();
+  const [ebayCategory, setEbayCategory] = React.useState("");
+  const [ebayOther, setEbayOther] = React.useState({
+    store: false,
+    topRated: false,
+    managedPayment: false,
+    internationalPayment: false,
+    promotedListing: false,
+  });
+  const [adRate, setAdRate] = React.useState("");
 
   const user = useContext(UserContext);
   function resetItem() {
@@ -47,20 +64,33 @@ export default function AddItem() {
   useEffect(() => {
     //Add platforms from firestore to local state
     firestore
-    .collection("SoldPlatforms")
+      .collection("SoldPlatforms")
       .get()
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
-          console.log(doc)
+          console.log(doc);
           let item = {
             label: doc.data().platform,
             value: doc.data().platform,
-            platformPercentFee: doc.data().platformPercentFee,
-            paymentPercentFee: doc.data().paymentPercentFee,
-            paymentFixedFee: doc.data().paymentFixedFee
+            fee: doc.data(),
           };
           tempItems.push(item);
+          if (doc.data().platform == "Ebay") {
+            let tempCategories = [];
+            doc.data().ebayCategory.map((category) => {
+              let tempCategory = {
+                label: category.CategoryName,
+                value: category.CategoryName,
+                categoryFee: category.CategoryFee,
+                maxFee: category.MaxFee,
+              };
+              tempCategories.push(tempCategory);
+              console.log(category.CategoryName);
+            });
+            setEbayCategories(tempCategories);
+            console.log(tempCategories);
+          }
         });
         console.log(tempItems);
         setSoldPlatforms(tempItems);
@@ -126,7 +156,7 @@ export default function AddItem() {
         .collection("Items")
         .add({
           Sold: soldBool,
-          boughtFrom: boughgtFrom,
+          boughtFrom: boughtFrom,
           itemCost: cost,
           itemName: name,
         })
@@ -143,64 +173,81 @@ export default function AddItem() {
     }
     if (sold === "true") {
       let profit;
-      console.log(soldPlatform)
-      console.log(soldPlatform.platform)
-      switch (soldPlatform.platform) {
-        case "Mecari":
-          let fee = parseFloat(soldCost) * soldPlatform.platformPercentFee;
-          profit =
-            parseFloat(soldCost || 0) -
-            parseFloat(cost || 0) -
-            parseFloat(shippingCost || 0) +
-            parseFloat(buyerShipping || 0) -
-            parseFloat(fee || 0);
-          console.log(profit);
-          break;
-        case "Ebay":
-          break;
-        case "OfferUp - Local" || "Craigslist" || "Local - Other":
-          profit =
-            parseFloat(soldCost || 0) -
-            parseFloat(cost || 0) -
-            parseFloat(shippingCost || 0) +
-            parseFloat(buyerShipping || 0);
-          break;
-        default:
-          profit =
-            parseFloat(soldCost || 0) -
-            parseFloat(cost || 0) -
-            parseFloat(shippingCost || 0) +
-            parseFloat(buyerShipping || 0);
-          break;
-      }
+      let fees = soldPlatforms.find(({ value }) => value === soldPlatform);
+      profit = CalculateProfit(
+        soldPlatform,
+        fees,
+        soldCost,
+        cost,
+        shippingCost,
+        buyerShipping,
+        ebayCategory,
+        ebayOther,
+        adRate
+      );
       console.log(profit);
-      firestore
-      .collection("Users")
-      .doc(user.uid)
-      .collection("Items")
-        .add({
-          Sold: soldBool,
-          boughtFrom: boughgtFrom,
-          itemCost: cost,
-          itemName: name,
-          soldCost: soldCost,
-          shippingCost: shippingCost,
-          buyerShipping: buyerShipping,
-          soldPlatform: soldPlatform.platform,
-          profit: profit,
-        })
-        .then(function (docRef) {
-          //TODO: Use this ID to delete documents. Find out where to store ID.
-          console.log("Document written with ID: ", docRef.id);
-          toast.success("Item was added");
-          resetItem();
-        })
-        .catch(function (error) {
-          console.error("Error adding document: ", error);
-          toast.error("Error adding document: ", error);
-        });
+      if (soldPlatform === "Ebay") {
+        firestore
+          .collection("Users")
+          .doc(user.uid)
+          .collection("Items")
+          .add({
+            Sold: soldBool,
+            boughtFrom: boughtFrom,
+            itemCost: cost,
+            itemName: name,
+            soldCost: soldCost,
+            shippingCost: shippingCost,
+            buyerShipping: buyerShipping,
+            soldPlatform: soldPlatform,
+            ebayCategory: ebayCategory,
+            ebayOther: ebayOther,
+            adRate: adRate || "",
+            profit: profit,
+          })
+          .then(function (docRef) {
+            //TODO: Use this ID to delete documents. Find out where to store ID.
+            console.log("Document written with ID: ", docRef.id);
+            toast.success("Item was added");
+            resetItem();
+          })
+          .catch(function (error) {
+            console.error("Error adding document: ", error);
+            toast.error("Error adding document: ", error);
+          });
+      } else {
+        firestore
+          .collection("Users")
+          .doc(user.uid)
+          .collection("Items")
+          .add({
+            Sold: soldBool,
+            boughtFrom: boughtFrom,
+            itemCost: cost,
+            itemName: name,
+            soldCost: soldCost,
+            shippingCost: shippingCost,
+            buyerShipping: buyerShipping,
+            soldPlatform: soldPlatform,
+            profit: profit,
+          })
+          .then(function (docRef) {
+            //TODO: Use this ID to delete documents. Find out where to store ID.
+            console.log("Document written with ID: ", docRef.id);
+            toast.success("Item was added");
+            resetItem();
+          })
+          .catch(function (error) {
+            console.error("Error adding document: ", error);
+            toast.error("Error adding document: ", error);
+          });
+      }
     }
   }
+
+  const handelCheckedChange = (event) => {
+    setEbayOther({ ...ebayOther, [event.target.name]: event.target.checked });
+  };
 
   const classes = useStyles();
   return (
@@ -235,7 +282,7 @@ export default function AddItem() {
                   <TextField
                     type="boughtFrom"
                     label="Buy Location"
-                    value={boughgtFrom}
+                    value={boughtFrom}
                     onChange={(e) => setBoughtFrom(e.target.value)}
                   />
                 </div>
@@ -291,49 +338,104 @@ export default function AddItem() {
                         <PlatformSelect
                           options={soldPlatforms}
                           placeholder="Selling Platform"
+                          onChange={(opt, meta) => {
+                            setSoldPlatform(opt.value);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div></div>
+                    {soldPlatform === "Ebay" ? (
+                      <div>
+                        <PlatformSelect
+                          options={ebayCategories}
+                          placeholder={ebayCategory || "Ebay Item Category"}
                           //isClearable
                           onChange={(opt, meta) => {
-                            let platform = {
-                              platform: opt.value,
-                              platformPercentFee: opt.platformPercentFee,
-                              paymentPercentFee: opt.paymentPercentFee,
-                              paymentFixedFee: opt.paymentFixedFee
-                            }
-                            console.log(platform)
-                            setSoldPlatform(platform)
+                            console.log(opt);
+                            setEbayCategory(opt.value);
                             // if (meta.action === "create-option") {
                             //   setNewPlatform(opt.value);
                             //   console.log(opt);
                             // }
                           }}
                         />
-                      </div>
-                      {/* <GridItem xs={12} sm={12} md={6}>
-                        <FormControl className={classes.formControl}>
-                          <InputLabel id="platform-select-label">
-                            Platform
-                          </InputLabel>
-                          <Select
-                            labelid="platform-select-label"
-                            id="platform-select"
-                            value={soldPlatform}
-                            onChange={(e) => {
-                              setSoldPlatform(e.target.value);
-                            }}
-                          >
-                            <MenuItem value={"Mecari"}>Mecari</MenuItem>
-                            <MenuItem value={"Ebay"}>Ebay</MenuItem>
-                            <MenuItem value={"Local"}>Local</MenuItem>
-                          </Select>
+                        <FormControl
+                          component="fieldset"
+                          className={classes.formControl}
+                        >
+                          <FormLabel component="legend">More Options</FormLabel>
+                          <FormGroup>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={ebayOther.store}
+                                  onChange={handelCheckedChange}
+                                  name="store"
+                                />
+                              }
+                              label="eBay Store (Basic or above)"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={ebayOther.topRated}
+                                  onChange={handelCheckedChange}
+                                  name="topRated"
+                                />
+                              }
+                              label="Top Rated Seller"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={ebayOther.managedPayment}
+                                  onChange={handelCheckedChange}
+                                  name="managedPayment"
+                                />
+                              }
+                              label="Ebay Managed Payment"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={ebayOther.internationalPayment}
+                                  onChange={handelCheckedChange}
+                                  name="internationalPayment"
+                                />
+                              }
+                              label="International payment"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={ebayOther.promotedListing}
+                                  onChange={handelCheckedChange}
+                                  name="promotedListing"
+                                />
+                              }
+                              label="Promoted Listing"
+                            />
+                          </FormGroup>
                         </FormControl>
-                      </GridItem> */}
-                    </div>
-                    <div>
-                  </div>
-                      {soldPlatform.platform === "Ebay" ? (
-                        <p>hello</p>
-                      ) : null
-                      }
+
+                        {ebayOther.promotedListing === true ? (
+                          <TextField
+                            autoFocus
+                            type="number"
+                            margin="dense"
+                            id="adRate"
+                            label="Promotion Ad Rate"
+                            value={adRate}
+                            onChange={(e) => {
+                              setAdRate(e.target.value);
+                            }}
+                            type="adRate"
+                            fullWidth
+                          />
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
