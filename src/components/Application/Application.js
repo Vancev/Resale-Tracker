@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
-import { Router } from "@reach/router";
+import { Router, Redirect } from "@reach/router";
 import SignIn from "../SignIn/SignIn";
 import UserProvider from "../../providors/UserProvider";
 import ProfilePage from "../ProfilePage";
 import { UserContext } from "../../providors/UserProvider";
 import AddItem from "../AddItem/AddItem";
-import ViewAll from "../ViewAll/ViewAll"
+import ViewAll from "../ViewAll/ViewAll";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
@@ -25,7 +25,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
 import useStyles from "./Application.style";
-import Sidebar from '../Sidebar/Sidebar'
+import Sidebar from "../Sidebar/Sidebar";
 
 function Application() {
   const user = useContext(UserContext);
@@ -44,15 +44,16 @@ function Application() {
 
   return user ? (
     <div>
-      <Sidebar/>
+      <Sidebar />
       <Router>
         <ProfilePage path="/" />
         <AddItem path="/dashboard/additem" />
-        <ViewAll path ="/dashboard/viewall"/>
+        <ViewAll path="/dashboard/viewall" />
       </Router>
     </div>
   ) : (
     <Router>
+      <Redirect noThrow={true} from="/*" to="/" />
       <SignIn path="/" />
     </Router>
   );

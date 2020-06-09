@@ -41,26 +41,26 @@ export function CalculateProfit(
         paymentFee =
           fees.fee.PayPalPercent * 0.01 * totalReceived + fees.fee.PayPalFixed;
       }
-      console.log(paymentFee)
+      console.log(paymentFee);
       var categoryFees = {};
       categoryFees = fees.fee.ebayCategory.find(
         ({ CategoryName }) => CategoryName === ebayCategory
       );
-      
+
       ebayFee = Math.min(
         totalReceived * 0.01 * categoryFees.CategoryFee,
         categoryFees.MaxFee
       );
-      console.log(ebayFee)
-      if(ebayOther.topRated){
-          let discount = ebayFee * fees.fee.TopRatedDiscount * .01;
-          ebayFee = ebayFee - discount;
+      console.log(ebayFee);
+      if (ebayOther.topRated) {
+        let discount = ebayFee * fees.fee.TopRatedDiscount * 0.01;
+        ebayFee = ebayFee - discount;
       }
-      if(ebayOther.promotedListing){
-          let promotionFee = totalReceived * .01 * adRate;
-          ebayFee = ebayFee - promotionFee
+      if (ebayOther.promotedListing) {
+        let promotionFee = totalReceived * 0.01 * adRate;
+        ebayFee = ebayFee - promotionFee;
       }
-      console.log(ebayFee)
+      console.log(ebayFee);
       profit =
         parseFloat(soldCost || 0) -
         parseFloat(cost || 0) -
@@ -68,7 +68,7 @@ export function CalculateProfit(
         parseFloat(ebayFee || 0) -
         parseFloat(shippingCost || 0) +
         parseFloat(buyerShipping || 0);
-        console.log(profit)
+      console.log(profit);
       break;
     case "OfferUp - Local" || "Craigslist" || "Local - Other":
       profit =

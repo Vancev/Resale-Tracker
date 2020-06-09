@@ -172,6 +172,7 @@ export default function AddItem() {
         });
     }
     if (sold === "true") {
+      console.log(ebayOther)
       let profit;
       let fees = soldPlatforms.find(({ value }) => value === soldPlatform);
       profit = CalculateProfit(
@@ -246,6 +247,7 @@ export default function AddItem() {
   }
 
   const handelCheckedChange = (event) => {
+    console.log(event.target.name, event.target.checked)
     setEbayOther({ ...ebayOther, [event.target.name]: event.target.checked });
   };
 
