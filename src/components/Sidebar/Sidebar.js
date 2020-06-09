@@ -9,7 +9,7 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
-import List from "@material-ui/core/List";
+import Button from "@material-ui/core/Button";
 import {
   ListItemIcon,
   ListItemText,
@@ -29,6 +29,8 @@ import MailIcon from "@material-ui/icons/Mail";
 import useStyles from "./Sidebar.style";
 import routes from "../../routes";
 import { Router, Link, Location } from "@reach/router";
+import {auth} from "../../firebase";
+
 const drawerWidth = 240;
 
 function Application() {
@@ -78,9 +80,10 @@ function Application() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap>
+          <Typography variant="h6" className={classes.title}>
             Resale Profit Tracker
           </Typography>
+          <Button color="inherit" onClick = {() => {auth.signOut()}}>Logout</Button>
         </Toolbar>
       </AppBar>
       <Drawer
