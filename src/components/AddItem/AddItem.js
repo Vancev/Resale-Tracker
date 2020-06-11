@@ -21,7 +21,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import { CalculateProfit } from "../../functions/CalculateProfit";
 
 //TODO Add createable select to TableList
-export default function AddItem() {
+export function AddItem(itemAdded) {
   const [cost, setCost] = useState("");
   const [boughtFrom, setBoughtFrom] = useState("");
   const [sold, setSold] = useState("false");
@@ -163,6 +163,8 @@ export default function AddItem() {
         .then(function (docRef) {
           //TODO: Use this ID to delete documents. Find out where to store ID.
           console.log("Document written with ID: ", docRef.id);
+          console.log(itemAdded)
+          itemAdded.itemAdded(docRef.id)
           toast.success("Item was added");
           resetItem();
         })
@@ -213,6 +215,7 @@ export default function AddItem() {
           .then(function (docRef) {
             //TODO: Use this ID to delete documents. Find out where to store ID.
             console.log("Document written with ID: ", docRef.id);
+            itemAdded(docRef.id)
             toast.success("Item was added");
             resetItem();
           })
@@ -240,6 +243,7 @@ export default function AddItem() {
           .then(function (docRef) {
             //TODO: Use this ID to delete documents. Find out where to store ID.
             console.log("Document written with ID: ", docRef.id);
+            itemAdded(docRef.id)
             toast.success("Item was added");
             resetItem();
           })

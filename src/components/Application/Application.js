@@ -4,7 +4,7 @@ import SignIn from "../SignIn/SignIn";
 import UserProvider from "../../providors/UserProvider";
 import ProfilePage from "../ProfilePage/ProfilePage";
 import { UserContext } from "../../providors/UserProvider";
-import AddItem from "../AddItem/AddItem";
+import {AddItem} from "../AddItem/AddItem";
 import ViewAll from "../ViewAll/ViewAll";
 import Expenses from "../Expenses/Expenses";
 import clsx from "clsx";
