@@ -80,6 +80,7 @@ export default function TableList() {
   const [shippingCost, setShippingCost] = useState(["", false]);
   const [soldPlatform, setSoldPlatform] = useState(["", false]);
   const [id, setID] = useState("");
+  const [soldDate, setSoldDate] = useState("")
   const [profit, setProfit] = React.useState([0, false]);
 
   //Platforms to display in the "Platform" dropdown
@@ -250,6 +251,7 @@ export default function TableList() {
                       Sold: sold[0],
                       profit: profit[0] || 0,
                       ebayCategory: ebayCategory[0],
+                      soldDate: soldDate,
                       ebayOther: ebayOther[0],
                       adRate: adRate[0] || "",
                       id: id,
@@ -264,6 +266,7 @@ export default function TableList() {
                       boughtFrom: boughtFrom[0],
                       itemCost: cost[0],
                       Sold: sold[0],
+                      soldDate: soldDate,
                       profit: profit[0] || 0,
                       id: id,
                     };
@@ -299,6 +302,7 @@ export default function TableList() {
     setEbayOther([rowData.ebayOther, false]);
     setEbayCategory([rowData.ebayCategory, false]);
     setAdRate([rowData.adRate, false]);
+    setSoldDate(rowData.soldDate)
     setID(rowData.id);
     setOpen(true);
   };
@@ -327,7 +331,15 @@ export default function TableList() {
       console.log("no changes made");
       setOpen(false);
     } else {
+      //If item was changed from unsold to sold, update the sold date
+      if(sold[1] == true){
+        let today = new Date()
+        let date = new Date().setDate(today.getDate())
+        //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
+        setSoldDate(date)
+      }
       let soldBool = null;
+      //converts sold from string to bool
       if (sold[0] === "true") {
         soldBool = true;
       } else if (sold[0] === "false") {
@@ -376,6 +388,7 @@ export default function TableList() {
             buyerShipping[0],
             ebayCategory[0],
             ebayOther[0],
+            soldDate,
             adRate[0]
           );
 
@@ -398,6 +411,7 @@ export default function TableList() {
               soldPlatform: soldPlatform[0],
               ebayCategory: ebayCategory[0],
               ebayOther: ebayOther[0],
+              soldDate,
               adRate: adRate[0] || "",
               profit: tempProfit,
             })
@@ -424,6 +438,7 @@ export default function TableList() {
               soldCost: soldCost[0],
               shippingCost: shippingCost[0],
               buyerShipping: buyerShipping[0],
+              soldDate,
               soldPlatform: soldPlatform[0],
               profit: tempProfit,
             })

@@ -1,5 +1,6 @@
 import AddItem from "./components/AddItem/AddItem";
 import ViewAll from "./components/ViewAll/ViewAll"
+import Expenses from "./components/Expenses/Expenses"
 import { Home, ContentPaste, Notifications, AccountCircle } from '@material-ui/icons';
 
 const Routes = [
@@ -16,6 +17,13 @@ const Routes = [
       navbarName: 'View All Items',
       icon: Home,
       component: ViewAll
+    },
+    {
+      path: '/dashboard/addexpense',
+      sidebarName: 'Add Expenses',
+      navbarName: 'Add Expenses',
+      icon: Home,
+      component: Expenses
     },
   ];
   
