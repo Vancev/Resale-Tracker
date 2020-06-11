@@ -24,6 +24,8 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Checkbox from "@material-ui/core/Checkbox";
 import { CalculateProfit } from "../../functions/CalculateProfit";
+import {AddItem} from "../AddItem/AddItem"
+import Grid from "@material-ui/core/Grid";
 
 const styles = {
   cardCategoryWhite: {
@@ -51,6 +53,9 @@ const styles = {
       fontSize: "65%",
       fontWeight: "400",
       lineHeight: "1",
+    },
+    root: {
+      flexGrow: 1,
     },
   },
 };
@@ -86,6 +91,7 @@ export default function TableList() {
   //Platforms to display in the "Platform" dropdown
   const [soldPlatforms, setSoldPlatforms] = React.useState();
   const [addedPlatform, setAddedPlatform] = React.useState(false);
+  const [added, setAdded] = React.useState("");
 
   const [ebayCategory, setEbayCategory] = React.useState(["", false]);
   const [ebayCategories, setEbayCategories] = React.useState();
@@ -215,12 +221,26 @@ export default function TableList() {
 
   //Update state after an item has been deleted or modified
   useEffect(() => {
+    console.log(items)
     firestore
       .collection("Users")
       .doc(user.uid)
       .collection("Items")
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
+          if (change.type === "added" && change.doc.id === added) {
+            //let tempItems = items;
+            // items.forEach((item) => {
+            //   console.log(doc.data());
+               let item = change.doc.data();
+               item["id"] = change.doc.id;
+            //   console.log(item);c.id,
+               //tempItems.push(item);
+            // });
+           // console.log(tempItems)
+             setItems([...items, item]);
+             setAdded('')
+          }
           if (change.type === "removed" && change.doc.id === toDelete) {
             const item = items.filter((item) => item.id !== change.doc.id);
             setItems(item);
@@ -283,7 +303,7 @@ export default function TableList() {
         });
       });
     setDelete("");
-  }, [toDelete, modified, profit]);
+  }, [toDelete, modified, profit, added]);
 
   //TODO: Allow manual changing of profit
   const handleClickOpen = (rowData) => {
@@ -484,10 +504,19 @@ export default function TableList() {
   //     setAddedPlatform(true);
   //   }
 
+
+  const add = (docRef) => {
+    setAdded(docRef)
+    console.log(docRef)
+  }
+
   const classes = useStyles();
   return (
-    <div>
-      <div>
+    <Grid container spacing={3}>
+      <Grid item xs={3}>
+        <AddItem itemAdded = {add}/>
+        </Grid>
+        <Grid item xs={9}>
         <MaterialTable
           title="All Items"
           columns={state.columns}
@@ -504,7 +533,7 @@ export default function TableList() {
               }),
           }}
         />
-      </div>
+        </Grid>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -738,6 +767,6 @@ export default function TableList() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Grid>
   );
 }

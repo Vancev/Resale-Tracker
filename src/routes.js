@@ -1,4 +1,4 @@
-import AddItem from "./components/AddItem/AddItem";
+import {AddItem} from "./components/AddItem/AddItem";
 import ViewAll from "./components/ViewAll/ViewAll"
 import Expenses from "./components/Expenses/Expenses"
 import { Home, ContentPaste, Notifications, AccountCircle } from '@material-ui/icons';
