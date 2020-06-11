@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import SignIn from "../SignIn/SignIn";
 import UserProvider from "../../providors/UserProvider";
-import ProfilePage from "../ProfilePage";
+import ProfilePage from "../ProfilePage/ProfilePage";
 import { UserContext } from "../../providors/UserProvider";
 import AddItem from "../AddItem/AddItem";
 import clsx from "clsx";

@@ -187,6 +187,9 @@ export default function AddItem() {
         adRate
       );
       console.log(profit);
+      let today = new Date()
+      let date = new Date().setDate(today.getDate())
+      //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
       if (soldPlatform === "Ebay") {
         firestore
           .collection("Users")
@@ -204,6 +207,7 @@ export default function AddItem() {
             ebayCategory: ebayCategory,
             ebayOther: ebayOther,
             adRate: adRate || "",
+            soldDate: date,
             profit: profit,
           })
           .then(function (docRef) {
@@ -230,6 +234,7 @@ export default function AddItem() {
             shippingCost: shippingCost,
             buyerShipping: buyerShipping,
             soldPlatform: soldPlatform,
+            soldDate: date,
             profit: profit,
           })
           .then(function (docRef) {

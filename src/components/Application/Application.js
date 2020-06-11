@@ -2,10 +2,11 @@ import React, { useContext } from "react";
 import { Router, Redirect } from "@reach/router";
 import SignIn from "../SignIn/SignIn";
 import UserProvider from "../../providors/UserProvider";
-import ProfilePage from "../ProfilePage";
+import ProfilePage from "../ProfilePage/ProfilePage";
 import { UserContext } from "../../providors/UserProvider";
 import AddItem from "../AddItem/AddItem";
 import ViewAll from "../ViewAll/ViewAll";
+import Expenses from "../Expenses/Expenses";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
@@ -49,11 +50,12 @@ function Application() {
         <ProfilePage path="/" />
         <AddItem path="/dashboard/additem" />
         <ViewAll path="/dashboard/viewall" />
+        <Expenses path="/dashboard/addexpense" />
       </Router>
     </div>
   ) : (
     <Router>
-      <Redirect noThrow={true} from="/*" to="/" />
+      {/* <Redirect noThrow={true} from="/*" to="/" /> */}
       <SignIn path="/" />
     </Router>
   );
