@@ -163,7 +163,6 @@ export function AddItem(itemAdded) {
         .then(function (docRef) {
           //TODO: Use this ID to delete documents. Find out where to store ID.
           console.log("Document written with ID: ", docRef.id);
-          console.log(itemAdded)
           itemAdded.itemAdded(docRef.id)
           toast.success("Item was added");
           resetItem();
@@ -215,7 +214,7 @@ export function AddItem(itemAdded) {
           .then(function (docRef) {
             //TODO: Use this ID to delete documents. Find out where to store ID.
             console.log("Document written with ID: ", docRef.id);
-            itemAdded(docRef.id)
+            itemAdded.itemAdded(docRef.id)
             toast.success("Item was added");
             resetItem();
           })
@@ -243,7 +242,7 @@ export function AddItem(itemAdded) {
           .then(function (docRef) {
             //TODO: Use this ID to delete documents. Find out where to store ID.
             console.log("Document written with ID: ", docRef.id);
-            itemAdded(docRef.id)
+            itemAdded.itemAdded(docRef.id)
             toast.success("Item was added");
             resetItem();
           })

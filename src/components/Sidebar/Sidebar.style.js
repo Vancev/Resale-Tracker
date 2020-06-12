@@ -7,6 +7,9 @@ export default makeStyles((theme) => ({
     },
     title: {
       flexGrow: 1,
+      textDecoration:'none',
+      color: "rgba(255,255,255,.62)"
+
     },
     appBar: {
       transition: theme.transitions.create(['margin', 'width'], {

@@ -48,7 +48,7 @@ function Application() {
       <Sidebar />
       <Router>
         <ProfilePage path="/" />
-        <AddItem path="/dashboard/additem" />
+        {/* <AddItem path="/dashboard/additem" /> */}
         <ViewAll path="/dashboard/viewall" />
         <Expenses path="/dashboard/addexpense" />
       </Router>
