@@ -29,7 +29,7 @@ import MailIcon from "@material-ui/icons/Mail";
 import useStyles from "./Sidebar.style";
 import routes from "../../routes";
 import { Router, Link, Location } from "@reach/router";
-import {auth} from "../../firebase";
+import { auth } from "../../firebase";
 
 const drawerWidth = 240;
 
@@ -49,21 +49,21 @@ function Application() {
     setOpen(false);
   };
 
-  function selectedRoute(item){
-      if(item === currentRoute.pathname){
-          return true
-      }
-      return false
+  function selectedRoute(item) {
+    if (item === currentRoute.pathname) {
+      return true;
+    }
+    return false;
   }
 
   return (
     <div>
-        {/* https://reach.tech/router/api/Location */}
-        <Location>
-            {(props) => {
-                setCurrentRoute(props.location)
-            }}
-            </Location>
+      {/* https://reach.tech/router/api/Location */}
+      <Location>
+        {(props) => {
+          setCurrentRoute(props.location);
+        }}
+      </Location>
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
@@ -80,10 +80,16 @@ function Application() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            Resale Profit Tracker
-          </Typography>
-          <Button color="inherit" onClick = {() => {auth.signOut()}}>Logout</Button>
+          <Link className={classes.title} to="/">Resale Profit Tracker</Link>
+         
+          <Button
+            color="inherit"
+            onClick={() => {
+              auth.signOut();
+            }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -106,26 +112,22 @@ function Application() {
         </div>
         <Divider />
         <MenuList>
-            {/* https://stackoverflow.com/questions/50801093/material-ui-drawer-selection-how-to-route */}
-            {routes.map((prop, key) => {
-              return (
-                <Link
-                  to={prop.path}
-                  style={{ textDecoration: "none" }}
-                  key={key}
+          {/* https://stackoverflow.com/questions/50801093/material-ui-drawer-selection-how-to-route */}
+          {routes.map((prop, key) => {
+            return (
+              <Link to={prop.path} style={{ textDecoration: "none" }} key={key}>
+                <MenuItem
+                  selected={selectedRoute(prop.path)}
+                  onClick={handleDrawerClose}
                 >
-                  <MenuItem
-                    selected={selectedRoute(prop.path)}
-                    onClick={handleDrawerClose}
-                  >
-                    <ListItemIcon>
-                      <prop.icon />
-                    </ListItemIcon>
-                    <ListItemText primary={prop.sidebarName} />
-                  </MenuItem>
-                </Link>
-              );
-            })}
+                  <ListItemIcon>
+                    <prop.icon />
+                  </ListItemIcon>
+                  <ListItemText primary={prop.sidebarName} />
+                </MenuItem>
+              </Link>
+            );
+          })}
         </MenuList>
       </Drawer>
       <div className={classes.drawerHeader} />
