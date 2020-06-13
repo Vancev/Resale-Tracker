@@ -22,4 +22,9 @@ export default makeStyles((theme) => ({
       pos: {
         marginBottom: 12,
       },
+      formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+        float: "left",
+      },
   }));

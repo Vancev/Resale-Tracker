@@ -42,4 +42,10 @@ export default makeStyles((theme) => ({
           textAlign: 'center',
           color: theme.palette.text.secondary,
         },
+        textField: {
+            width: '250ch',
+          },
+          margin: {
+            margin: theme.spacing(1),
+          },
   }));

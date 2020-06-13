@@ -59,13 +59,11 @@ export default function Expenses() {
           tempItems.push(item);
         });
         setExpenses(tempItems);
-        console.log(tempItems);
       });
   }, [expenseAdded, toDelete]);
 
   let today = new Date();
   const date = new Date().setDate(today.getDate());
-  console.log(date);
 
   function formatDate(ticks) {
     var date = new Date(ticks);
@@ -75,7 +73,6 @@ export default function Expenses() {
       date.getDate() +
       ", " +
       date.getFullYear();
-    console.log(today);
     return today;
   }
 
