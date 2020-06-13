@@ -28,6 +28,8 @@ import {AddItem} from "../AddItem/AddItem"
 import Grid from "@material-ui/core/Grid";
 import useStyles from "./ViewAll.style";
 import Paper from "@material-ui/core/Paper";
+import clsx from 'clsx';
+
 
 export default function TableList() {
   const user = useContext(UserContext);
@@ -576,6 +578,7 @@ export default function TableList() {
                 }}
               />
               <TextField
+                className={clsx(classes.margin, classes.textField)}
                 autoFocus
                 required
                 margin="dense"
