@@ -8,6 +8,13 @@ export default makeStyles((theme) => ({
       textAlign: 'center',
       color: theme.palette.text.secondary,
     },
+    pie: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      display: "inline-block",
+      margin: 0,
+    },
     title: {
         minWidth: 275,
       },

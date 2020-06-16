@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { firestore } from "../firebase";
-import { UserContext } from "../providors/UserProvider";
 
 export function Profit(items, expenses, startDate, endDate) {
-  const user = useContext(UserContext);
 
   var date = new Date();
   let toDate = new Date().setDate(date.getDate() - endDate);
@@ -22,7 +20,7 @@ export function Profit(items, expenses, startDate, endDate) {
           costs = costs + parseFloat(expense.Value)
       }
   })
-  return profit - costs;
+  return (profit - costs).toFixed(2);
 }
 
 export function ROI(items, expenses, startDate, endDate) {
@@ -35,7 +33,6 @@ export function ROI(items, expenses, startDate, endDate) {
   let costs = 0;
   items.map((item) => {
     if (toDate > item.soldDate && item.soldDate > fromDate) {
-      console.log(item)
       costs = costs + (parseFloat(item.itemCost) || 0);
       costs = costs + (parseFloat(item.shippingCost) || 0);
       costs = costs + (parseFloat(item.sellingFee) || 0);
@@ -50,6 +47,5 @@ export function ROI(items, expenses, startDate, endDate) {
       }
   })
 
-  console.log(profit, costs, expense)
-  return (profit/(costs+expense)) * 100;
+  return ((profit/(costs+expense)) * 100).toFixed(2);
 }
