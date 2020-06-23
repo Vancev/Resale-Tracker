@@ -114,10 +114,8 @@ export default function TableList() {
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
-          console.log(doc.data());
           let item = doc.data();
           item["id"] = doc.id;
-          console.log(item);
           //   let item = {
           //     name: doc.data().itemName,
           //     bought: doc.data().boughtFrom,
@@ -157,13 +155,10 @@ export default function TableList() {
                 maxFee: category.MaxFee,
               };
               tempCategories.push(tempCategory);
-              console.log(category.CategoryName);
             });
             setEbayCategories(tempCategories);
-            console.log(tempCategories);
           }
         });
-        console.log(tempItems);
         setSoldPlatforms(tempItems);
       });
   }, []);
@@ -190,7 +185,6 @@ export default function TableList() {
 
   //Update state after an item has been deleted or modified
   useEffect(() => {
-    console.log(items)
     firestore
       .collection("Users")
       .doc(user.uid)
@@ -269,7 +263,6 @@ export default function TableList() {
 
   //TODO: Allow manual changing of profit
   const handleClickOpen = (rowData) => {
-    console.log(rowData);
     setName([rowData.itemName, false]);
     setCost([rowData.itemCost, false]);
     setBoughtFrom([rowData.boughtFrom, false]);
@@ -295,7 +288,6 @@ export default function TableList() {
 
   const handleSave = () => {
     //Check if any fields have been modified
-    console.log(soldPlatform);
     if (
       cost[1] == false &&
       boughtFrom[1] == false &&
@@ -330,7 +322,6 @@ export default function TableList() {
         soldBool = sold[0];
       }
       if (soldBool === false) {
-        console.log(boughtFrom[0], cost[0], name[0], sold[0]);
         setModified(true);
         setProfit(["", false]);
         firestore
@@ -354,7 +345,6 @@ export default function TableList() {
             //toast.error("Error adding document: ", error);
           });
       }
-      console.log(soldPlatform[0]);
       if (soldBool === true) {
         let fees = soldPlatforms.find(({ value }) => value === soldPlatform[0]);
         let tempProfit;
@@ -469,7 +459,6 @@ export default function TableList() {
 
   const add = (docRef) => {
     setAdded(docRef)
-    console.log(docRef)
   }
 
   const classes = useStyles();
@@ -569,7 +558,6 @@ export default function TableList() {
                 placeholder={soldPlatform[0] || "Selling Platform"}
                 //isClearable
                 onChange={(opt, meta) => {
-                  console.log(opt);
                   setSoldPlatform([opt.value, true]);
                   // if (meta.action === "create-option") {
                   //   setNewPlatform(opt.value);
@@ -627,7 +615,6 @@ export default function TableList() {
                     placeholder={ebayCategory[0] || "Ebay Item Category"}
                     //isClearable
                     onChange={(opt, meta) => {
-                      console.log(opt);
                       setEbayCategory([opt.value, true]);
                       // if (meta.action === "create-option") {
                       //   setNewPlatform(opt.value);

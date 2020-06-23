@@ -29,6 +29,11 @@ export function AddItem(itemAdded) {
   const [soldCost, setSoldCost] = useState("");
   const [buyerShipping, setBuyerShipping] = useState("");
   const [shippingCost, setShippingCost] = useState("");
+
+  const [costError, setCostError] = useState();
+  const [nameError, setNameError] = useState();
+  const [soldCostError, setSoldCostError] = useState();
+
   //Single platform chosen
   const [soldPlatform, setSoldPlatform] = useState({});
   const [profit, setProfit] = React.useState(0);
@@ -55,6 +60,9 @@ export function AddItem(itemAdded) {
     setShippingCost("");
     setSoldPlatform({});
     setProfit(0);
+    setCostError();
+    setNameError();
+    setSoldCostError()
   }
 
   //Array of all possible selling platforms
@@ -69,7 +77,6 @@ export function AddItem(itemAdded) {
       .then((data) => {
         let tempItems = [];
         data.forEach((doc) => {
-          console.log(doc);
           let item = {
             label: doc.data().platform,
             value: doc.data().platform,
@@ -86,13 +93,10 @@ export function AddItem(itemAdded) {
                 maxFee: category.MaxFee,
               };
               tempCategories.push(tempCategory);
-              console.log(category.CategoryName);
             });
             setEbayCategories(tempCategories);
-            console.log(tempCategories);
           }
         });
-        console.log(tempItems);
         setSoldPlatforms(tempItems);
       });
   }, []);
@@ -148,50 +152,19 @@ export function AddItem(itemAdded) {
     } else {
       soldBool = null;
     }
-    /* Send the item to Firebase */
-    if (sold === "false") {
-      firestore
-        .collection("Users")
-        .doc(user.uid)
-        .collection("Items")
-        .add({
-          Sold: soldBool,
-          boughtFrom: boughtFrom,
-          itemCost: cost,
-          itemName: name,
-        })
-        .then(function (docRef) {
-          //TODO: Use this ID to delete documents. Find out where to store ID.
-          console.log("Document written with ID: ", docRef.id);
-          itemAdded.itemAdded(docRef.id)
-          toast.success("Item was added");
-          resetItem();
-        })
-        .catch(function (error) {
-          console.error("Error adding document: ", error);
-          toast.error("Error adding document: ", error);
-        });
+    let inputError = false;
+    if (name == "") {
+      setNameError("Can not be empty");
+      inputError = true;
     }
-    if (sold === "true") {
-      console.log(ebayOther)
-      let profit;
-      let fees = soldPlatforms.find(({ value }) => value === soldPlatform);
-      profit = CalculateProfit(
-        soldPlatform,
-        fees,
-        soldCost,
-        cost,
-        shippingCost,
-        buyerShipping,
-        ebayCategory,
-        ebayOther,
-        adRate
-      );
-      console.log(profit);
-      let today = new Date()
-      let date = new Date().setDate(today.getDate())
-      //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
-      if (soldPlatform === "Ebay") {
+    if (soldBool && soldCost == "") {
+      setSoldCostError("Can not be empty");
+      inputError = true;
+    }
+    //if No unput errors detected
+    if (!inputError) {
+      /* Send the item to Firebase */
+      if (sold === "false") {
         firestore
           .collection("Users")
           .doc(user.uid)
@@ -199,50 +172,13 @@ export function AddItem(itemAdded) {
           .add({
             Sold: soldBool,
             boughtFrom: boughtFrom,
-            itemCost: cost,
+            itemCost: cost || 0,
             itemName: name,
-            soldCost: soldCost,
-            shippingCost: shippingCost,
-            buyerShipping: buyerShipping,
-            soldPlatform: soldPlatform,
-            ebayCategory: ebayCategory,
-            ebayOther: ebayOther,
-            adRate: adRate || "",
-            soldDate: date,
-            profit: profit,
           })
           .then(function (docRef) {
             //TODO: Use this ID to delete documents. Find out where to store ID.
             console.log("Document written with ID: ", docRef.id);
-            itemAdded.itemAdded(docRef.id)
-            toast.success("Item was added");
-            resetItem();
-          })
-          .catch(function (error) {
-            console.error("Error adding document: ", error);
-            toast.error("Error adding document: ", error);
-          });
-      } else {
-        firestore
-          .collection("Users")
-          .doc(user.uid)
-          .collection("Items")
-          .add({
-            Sold: soldBool,
-            boughtFrom: boughtFrom,
-            itemCost: cost,
-            itemName: name,
-            soldCost: soldCost,
-            shippingCost: shippingCost,
-            buyerShipping: buyerShipping,
-            soldPlatform: soldPlatform,
-            soldDate: date,
-            profit: profit,
-          })
-          .then(function (docRef) {
-            //TODO: Use this ID to delete documents. Find out where to store ID.
-            console.log("Document written with ID: ", docRef.id);
-            itemAdded.itemAdded(docRef.id)
+            itemAdded.itemAdded(docRef.id);
             toast.success("Item was added");
             resetItem();
           })
@@ -251,11 +187,88 @@ export function AddItem(itemAdded) {
             toast.error("Error adding document: ", error);
           });
       }
+      if (sold === "true") {
+        let profit;
+        let fees = soldPlatforms.find(({ value }) => value === soldPlatform);
+        profit = CalculateProfit(
+          soldPlatform,
+          fees,
+          soldCost,
+          cost,
+          shippingCost,
+          buyerShipping,
+          ebayCategory,
+          ebayOther,
+          adRate
+        );
+        let today = new Date();
+        let date = new Date().setDate(today.getDate());
+        //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
+        if (soldPlatform === "Ebay") {
+          firestore
+            .collection("Users")
+            .doc(user.uid)
+            .collection("Items")
+            .add({
+              Sold: soldBool,
+              boughtFrom: boughtFrom,
+              itemCost: cost || 0,
+              itemName: name,
+              soldCost: soldCost,
+              shippingCost: shippingCost || 0,
+              buyerShipping: buyerShipping || 0,
+              soldPlatform: soldPlatform,
+              ebayCategory: ebayCategory,
+              ebayOther: ebayOther,
+              adRate: adRate || "",
+              soldDate: date,
+              profit: profit,
+            })
+            .then(function (docRef) {
+              //TODO: Use this ID to delete documents. Find out where to store ID.
+              console.log("Document written with ID: ", docRef.id);
+              itemAdded.itemAdded(docRef.id);
+              toast.success("Item was added");
+              resetItem();
+            })
+            .catch(function (error) {
+              console.error("Error adding document: ", error);
+              toast.error("Error adding document: ", error);
+            });
+        } else {
+          firestore
+            .collection("Users")
+            .doc(user.uid)
+            .collection("Items")
+            .add({
+              Sold: soldBool,
+              boughtFrom: boughtFrom,
+              itemCost: cost || 0,
+              itemName: name,
+              soldCost: soldCost,
+              shippingCost: shippingCost || 0,
+              buyerShipping: buyerShipping || 0,
+              soldPlatform: soldPlatform,
+              soldDate: date,
+              profit: profit,
+            })
+            .then(function (docRef) {
+              //TODO: Use this ID to delete documents. Find out where to store ID.
+              console.log("Document written with ID: ", docRef.id);
+              itemAdded.itemAdded(docRef.id);
+              toast.success("Item was added");
+              resetItem();
+            })
+            .catch(function (error) {
+              console.error("Error adding document: ", error);
+              toast.error("Error adding document: ", error);
+            });
+        }
+      }
     }
   }
 
   const handelCheckedChange = (event) => {
-    console.log(event.target.name, event.target.checked)
     setEbayOther({ ...ebayOther, [event.target.name]: event.target.checked });
   };
 
@@ -272,10 +285,13 @@ export function AddItem(itemAdded) {
               <div>
                 <div>
                   <TextField
-                    type="itemName"
-                    label="Name"
+                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    error={nameError}
+                    helperText={nameError}
+                    type="itemName"
+                    label="Name"
                   />
                 </div>
                 <div>
@@ -283,7 +299,18 @@ export function AddItem(itemAdded) {
                     type="Cost"
                     label="Cost"
                     value={cost}
-                    onChange={(e) => setCost(e.target.value)}
+                    onChange={(e) => {
+                      var rgx = /^[0-9]*\.?[0-9]*$/;
+                      if (e.target.value === "" || rgx.test(e.target.value)) {
+                        setCost(e.target.value);
+                      }
+
+                      if (!rgx.test(e.target.value)) {
+                        setCostError("Must be numberic value");
+                      }
+                    }}
+                    error={costError}
+                    helperText={costError}
                   />
                 </div>
               </div>
@@ -303,9 +330,9 @@ export function AddItem(itemAdded) {
                     <InputLabel htmlFor="age-native-simple">Sold?</InputLabel>
                     <Select
                       native
+                      required
                       value={sold}
                       onChange={(e) => {
-                        console.log(e.target.value);
                         setSold(e.target.value);
                       }}
                     >
@@ -320,10 +347,25 @@ export function AddItem(itemAdded) {
                   <div>
                     <div>
                       <TextField
+                        required
                         type="soldCost"
                         label="Sold Cost"
                         value={soldCost}
-                        onChange={(e) => setSoldCost(e.target.value)}
+                        onChange={(e) => {
+                          var rgx = /^[0-9]*\.?[0-9]*$/;
+                          if (
+                            e.target.value === "" ||
+                            rgx.test(e.target.value)
+                          ) {
+                            setSoldCost(e.target.value);
+                          }
+
+                          if (!rgx.test(e.target.value)) {
+                            setSoldCostError("Must be numberic value");
+                          }
+                        }}
+                        error={soldCostError}
+                        helperText={soldCostError}
                       />
                     </div>
                     <div xs={12} sm={12} md={6}>
@@ -362,7 +404,6 @@ export function AddItem(itemAdded) {
                           placeholder={ebayCategory || "Ebay Item Category"}
                           //isClearable
                           onChange={(opt, meta) => {
-                            console.log(opt);
                             setEbayCategory(opt.value);
                             // if (meta.action === "create-option") {
                             //   setNewPlatform(opt.value);
