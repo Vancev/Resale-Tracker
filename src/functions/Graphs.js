@@ -89,22 +89,17 @@ export function RevenuePie(items, startDate) {
   //Filter to onnly have items within the date range
   let dateFilteredItems = items.filter((platform) => platform.soldDate > fromDate);
 
-  console.log(dateFilteredItems)
 
   //Filter to get each unique platform
   let platforms = dateFilteredItems.map(data => data.soldPlatform).filter((platformType, index, array) => array.indexOf(platformType) === index)
-console.log()
   let tempData = []
   let sum = 0;
   platforms.map(platform => {
     dateFilteredItems.filter(item => item.soldPlatform == platform).map((item) => sum+=  parseFloat(item.profit.toFixed(2)))
-    console.log(sum)
     tempData = [platform, sum]
-    console.log(tempData)
     platformData.push(tempData)
     sum = 0;
   })
-  console.log(platformData)
 
   return (
     <Chart
@@ -114,7 +109,7 @@ console.log()
     loader={<div>Loading Chart</div>}
     data={platformData}
     options={{
-      title: 'Sales per Platform',
+      title: 'Revenue per Platform',
     }}
   />
   )

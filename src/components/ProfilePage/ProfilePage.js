@@ -20,7 +20,7 @@ const ProfilePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
   const { photoURL, displayName, email } = user;
-
+console.log(email)
   const [items, setItems] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [profitDate, setProfitDate] = useState(30);

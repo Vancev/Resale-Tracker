@@ -85,5 +85,5 @@ export function CalculateProfit(
         parseFloat(buyerShipping || 0);
       break;
   }
-  return profit;
+  return profit.toFixed(2);
 }
