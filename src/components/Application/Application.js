@@ -43,22 +43,28 @@ function Application() {
     setOpen(false);
   };
 
-  return user ? (
+  //https://github.com/reach/router/issues/185#issuecomment-560876548
+  const ProtectedRoute = ({component: Component, ...props}) => {
+    console.log(user)
+    return (
+      <div>
+        {user ? <Component {...props}/>: <SignIn />}
+      </div>
+    )
+  }
+
+  return(
     <div>
       <Sidebar />
       <Router>
-        <ProfilePage path="/" />
-        {/* <AddItem path="/dashboard/additem" /> */}
-        <ViewAll path="/dashboard/viewall" />
-        <Expenses path="/dashboard/addexpense" />
+        <ProtectedRoute component={ProfilePage} path="/" />
+        <ProtectedRoute component={ViewAll} path="/dashboard/viewall" />
+        <ProtectedRoute component={Expenses} path="/dashboard/addexpense" />
+        {/* <ViewAll path="/dashboard/viewall" />
+        <Expenses path="/dashboard/addexpense" /> */}
       </Router>
     </div>
-  ) : (
-    <Router>
-      {/* <Redirect noThrow={true} from="/*" to="/" /> */}
-      <SignIn path="/" />
-    </Router>
-  );
+  )
 }
 
 export default Application;

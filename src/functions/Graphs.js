@@ -95,7 +95,7 @@ export function RevenuePie(items, startDate) {
   let tempData = []
   let sum = 0;
   platforms.map(platform => {
-    dateFilteredItems.filter(item => item.soldPlatform == platform).map((item) => sum+=  parseFloat(item.profit.toFixed(2)))
+    dateFilteredItems.filter(item => item.soldPlatform == platform).map((item) => sum+=  parseFloat(item.profit))
     tempData = [platform, sum]
     platformData.push(tempData)
     sum = 0;
