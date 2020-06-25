@@ -2,11 +2,11 @@
 
 Resale tracker is a web application that helps resellers track their items and profits. 
 Sellers are able to enter item information into the app such as:
--item name
--cost
--buy location
--sold location
--shipping costs
+- item name
+- cost
+- buy location
+- sold location
+- shipping costs
 
 The app automatically calculates profits for items sold on ebay, mecari, and locally. Stats such as total profit, ROI, sales per platform are automatically created.
 
