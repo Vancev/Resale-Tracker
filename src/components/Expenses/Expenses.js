@@ -125,7 +125,7 @@ export default function Expenses() {
   return (
     <div>
       <Grid container spacing={3}>
-        <Grid item xs={3}>
+        <Grid item xs={12} sm={9} md={9} xl={10}>
           <Paper className={classes.paper}>
             <div>
               <h4 className={classes.cardTitleWhite}>Add New Expense</h4>
@@ -154,7 +154,7 @@ export default function Expenses() {
           </Paper>
         </Grid>
         <ToastContainer />
-        <Grid item xs={9}>
+        <Grid item xs={12} sm={9} md={9} xl={10}>
         <Paper className={classes.paper}>
           <MaterialTable
             title="All Items"
