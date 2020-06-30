@@ -161,6 +161,12 @@ export function AddItem(itemAdded) {
       setSoldCostError("Can not be empty");
       inputError = true;
     }
+    let sellingPlatform = soldPlatform;
+    if(Object.keys(soldPlatform).length === 0){
+      sellingPlatform = "Not Specified"
+      console.log("Others")
+    }
+    console.log(sellingPlatform)
     //if No unput errors detected
     if (!inputError) {
       /* Send the item to Firebase */
@@ -189,9 +195,9 @@ export function AddItem(itemAdded) {
       }
       if (sold === "true") {
         let profit;
-        let fees = soldPlatforms.find(({ value }) => value === soldPlatform);
+        let fees = soldPlatforms.find(({ value }) => value === sellingPlatform);
         profit = CalculateProfit(
-          soldPlatform,
+          sellingPlatform,
           fees,
           soldCost,
           cost,
@@ -204,7 +210,7 @@ export function AddItem(itemAdded) {
         let today = new Date();
         let date = new Date().setDate(today.getDate());
         //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
-        if (soldPlatform === "Ebay") {
+        if (sellingPlatform === "Ebay") {
           firestore
             .collection("Users")
             .doc(user.uid)
@@ -217,7 +223,7 @@ export function AddItem(itemAdded) {
               soldCost: soldCost,
               shippingCost: shippingCost || 0,
               buyerShipping: buyerShipping || 0,
-              soldPlatform: soldPlatform,
+              soldPlatform: sellingPlatform,
               ebayCategory: ebayCategory,
               ebayOther: ebayOther,
               adRate: adRate || "",
@@ -248,7 +254,7 @@ export function AddItem(itemAdded) {
               soldCost: soldCost,
               shippingCost: shippingCost || 0,
               buyerShipping: buyerShipping || 0,
-              soldPlatform: soldPlatform,
+              soldPlatform: sellingPlatform,
               soldDate: date,
               profit: profit,
             })

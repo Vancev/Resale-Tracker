@@ -86,10 +86,10 @@ export function RevenuePie(items, startDate) {
   let platformData = [];
   platformData.push(["Platform", "Count"])
 
-  //Filter to onnly have items within the date range
+  //Filter to only have items within the date range
   let dateFilteredItems = items.filter((platform) => platform.soldDate > fromDate);
 
-
+console.log(dateFilteredItems)
   //Filter to get each unique platform
   let platforms = dateFilteredItems.map(data => data.soldPlatform).filter((platformType, index, array) => array.indexOf(platformType) === index)
   let tempData = []
@@ -103,6 +103,8 @@ export function RevenuePie(items, startDate) {
 
   return (
     <Chart
+    width={'768'}
+    height={'460'}
     // width={'500px'}
     // height={'300px'}
     chartType="PieChart"
@@ -136,6 +138,8 @@ export function SoldPie(items, startDate) {
 
   return (
     <Chart
+    width={'768'}
+    height={'460'}
     // width={'500px'}
     // height={'300px'}
     chartType="PieChart"

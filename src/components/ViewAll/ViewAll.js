@@ -464,12 +464,12 @@ export default function TableList() {
   const classes = useStyles();
   return (
     <Grid container spacing={3}>
-      <Grid item xs={3}>
+      <Grid item xs={12} sm={3} md={3} xl={2}>
       <Paper className={classes.paper}>
         <AddItem itemAdded = {add}/>
         </Paper>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={12} sm={9} md={9} xl={10}>
         <Paper className={classes.paper}>
         <MaterialTable
           title="All Items"

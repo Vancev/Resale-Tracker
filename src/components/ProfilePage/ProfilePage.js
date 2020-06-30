@@ -63,7 +63,7 @@ console.log(email)
     <div className={classes.root}>
       <Card className={classes.card}>
         <Grid container spacing={4}>
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6} md={6} xl={6}>
             <Paper className={classes.paper}>
               <CardContent>
                 <FormControl
@@ -100,7 +100,7 @@ console.log(email)
               </CardContent>
             </Paper>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6} md={6} xl={6}>
             <Paper className={classes.paper}>
               <CardContent>
                 <FormControl
@@ -141,7 +141,8 @@ console.log(email)
           <Grid item xs={12}>
             <Paper className={classes.paper}>{MonthlyProfit(items, expenses)}</Paper>
           </Grid>
-        <Grid item xs = {6}>
+        <Grid item xs={12} sm={12} md={6} xl={6}>
+        
         <FormControl
                   className={classes.formControl}
                   autoFocus
@@ -163,8 +164,10 @@ console.log(email)
                     <option value={999999}>All Time</option>
                   </Select>
                 </FormControl>
+                <Paper className={classes.pie}>
+          {SoldPie(items, salesPieDate)}</Paper>
         </Grid>
-        <Grid item xs = {6}>
+        <Grid item xs={12} sm={12} md={6} xl={6}>
         <FormControl
                   className={classes.formControl}
                   autoFocus
@@ -186,12 +189,6 @@ console.log(email)
                     <option value={999999}>All Time</option>
                   </Select>
                 </FormControl>
-        </Grid>
-        <Grid item xs = {6}>
-        <Paper className={classes.pie}>
-          {SoldPie(items, salesPieDate)}</Paper>
-        </Grid>
-        <Grid item xs = {6}>
         <Paper className={classes.pie}>{RevenuePie(items, revenuePieDate)}</Paper>
         </Grid>
         </Grid>
