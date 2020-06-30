@@ -84,70 +84,82 @@ export function RevenuePie(items, startDate) {
   const fromDate = new Date().setDate(date.getDate() - startDate);
 
   let platformData = [];
-  platformData.push(["Platform", "Count"])
+  platformData.push(["Platform", "Count"]);
 
   //Filter to only have items within the date range
-  let dateFilteredItems = items.filter((platform) => platform.soldDate > fromDate);
+  let dateFilteredItems = items.filter(
+    (platform) => platform.soldDate > fromDate
+  );
 
-console.log(dateFilteredItems)
+  console.log(dateFilteredItems);
   //Filter to get each unique platform
-  let platforms = dateFilteredItems.map(data => data.soldPlatform).filter((platformType, index, array) => array.indexOf(platformType) === index)
-  let tempData = []
+  let platforms = dateFilteredItems
+    .map((data) => data.soldPlatform)
+    .filter(
+      (platformType, index, array) => array.indexOf(platformType) === index
+    );
+  let tempData = [];
   let sum = 0;
-  platforms.map(platform => {
-    dateFilteredItems.filter(item => item.soldPlatform == platform).map((item) => sum+=  parseFloat(item.profit))
-    tempData = [platform, sum]
-    platformData.push(tempData)
+  platforms.map((platform) => {
+    dateFilteredItems
+      .filter((item) => item.soldPlatform == platform)
+      .map((item) => (sum += parseFloat(item.profit)));
+    tempData = [platform, sum];
+    platformData.push(tempData);
     sum = 0;
-  })
+  });
 
   return (
     <Chart
-    width={'768'}
-    height={'460'}
-    // width={'500px'}
-    // height={'300px'}
-    chartType="PieChart"
-    loader={<div>Loading Chart</div>}
-    data={platformData}
-    options={{
-      title: 'Revenue per Platform',
-    }}
-  />
-  )
+      width={"768"}
+      height={"460"}
+      chartType="PieChart"
+      loader={<div>Loading Chart</div>}
+      data={platformData}
+      options={{
+        title: "Revenue per Platform",
+      }}
+    />
+  );
 }
 export function SoldPie(items, startDate) {
   var date = new Date();
   const fromDate = new Date().setDate(date.getDate() - startDate);
 
   let platformData = [];
-  platformData.push(["Platform", "Count"])
+  platformData.push(["Platform", "Count"]);
 
   //Filter to onnly have items within the date range
-  let dateFilteredItems = items.filter((platform) => platform.soldDate > fromDate);
+  let dateFilteredItems = items.filter(
+    (platform) => platform.soldDate > fromDate
+  );
 
+  let platforms = dateFilteredItems
+    .map((data) => data.soldPlatform)
+    .filter(
+      (platformType, index, array) => array.indexOf(platformType) === index
+    );
 
-  let platforms = dateFilteredItems.map(data => data.soldPlatform).filter((platformType, index, array) => array.indexOf(platformType) === index)
+  let tempData = [];
+  platforms.map((platform) => {
+    tempData = [
+      platform,
+      dateFilteredItems.filter((item) => item.soldPlatform == platform).length,
+    ];
 
-  let tempData = []
-  platforms.map(platform => {
-    tempData = [platform, dateFilteredItems.filter(item => item.soldPlatform == platform).length]
-    
-    platformData.push(tempData)
-  })
+    platformData.push(tempData);
+  });
 
   return (
     <Chart
-    width={'768'}
-    height={'460'}
-    // width={'500px'}
-    // height={'300px'}
-    chartType="PieChart"
-    loader={<div>Loading Chart</div>}
-    data={platformData}
-    options={{
-      title: 'Sales per Platform',
-    }}
-  />
-  )
+      width={"768"}
+      height={"460"}
+      chartType="PieChart"
+      loader={<div>Loading Chart</div>}
+      data={platformData}
+      options={{
+        title: "Sales per Platform",
+      }}
+    />
+  );
 }

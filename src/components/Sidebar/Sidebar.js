@@ -19,13 +19,9 @@ import {
   MenuItem,
   Drawer,
 } from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import ListItem from "@material-ui/core/ListItem";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
 import useStyles from "./Sidebar.style";
 import routes from "../../routes";
 import { Router, Link, Location } from "@reach/router";
@@ -80,8 +76,10 @@ function Application() {
           >
             <MenuIcon />
           </IconButton>
-          <Link className={classes.title} to="/">Resale Profit Tracker</Link>
-         
+          <Link className={classes.title} to="/">
+            Resale Profit Tracker
+          </Link>
+
           <Button
             color="inherit"
             onClick={() => {

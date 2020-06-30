@@ -1,13 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "../../providors/UserProvider";
-import { auth } from "../../firebase";
 import useStyles from "./ProfilePage.style";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { Profit, ROI } from "../../functions/CalculateHomepage";
 import { MonthlyProfit, SoldPie, RevenuePie } from "../../functions/Graphs";
@@ -20,7 +18,7 @@ const ProfilePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
   const { photoURL, displayName, email } = user;
-console.log(email)
+  console.log(email);
   const [items, setItems] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [profitDate, setProfitDate] = useState(30);
@@ -139,58 +137,62 @@ console.log(email)
             </Paper>
           </Grid>
           <Grid item xs={12}>
-            <Paper className={classes.paper}>{MonthlyProfit(items, expenses)}</Paper>
+            <Paper className={classes.paper}>
+              {MonthlyProfit(items, expenses)}
+            </Paper>
           </Grid>
-        <Grid item xs={12} sm={12} md={6} xl={6}>
-        
-        <FormControl
-                  className={classes.formControl}
-                  autoFocus
-                  margin="dense"
-                >
-                  <InputLabel htmlFor="age-native-simple">Range</InputLabel>
-                  <Select
-                    native
-                    value={salesPieDate}
-                    onChange={(e) => {
-                       setsalesPieDate(e.target.value);
-                    }}
-                  >
-                    <option value={1}>1 Day</option>
-                    <option value={7}>7 Days</option>
-                    <option value={30}>30 Days</option>
-                    <option value={90}>90 Days</option>
-                    <option value={365}>1 Year</option>
-                    <option value={999999}>All Time</option>
-                  </Select>
-                </FormControl>
-                <Paper className={classes.pie}>
-          {SoldPie(items, salesPieDate)}</Paper>
-        </Grid>
-        <Grid item xs={12} sm={12} md={6} xl={6}>
-        <FormControl
-                  className={classes.formControl}
-                  autoFocus
-                  margin="dense"
-                >
-                  <InputLabel htmlFor="age-native-simple">Range</InputLabel>
-                  <Select
-                    native
-                    value={revenuePieDate}
-                    onChange={(e) => {
-                      setrevenuePieDate(e.target.value);
-                    }}
-                  >
-                    <option value={1}>1 Day</option>
-                    <option value={7}>7 Days</option>
-                    <option value={30}>30 Days</option>
-                    <option value={90}>90 Days</option>
-                    <option value={365}>1 Year</option>
-                    <option value={999999}>All Time</option>
-                  </Select>
-                </FormControl>
-        <Paper className={classes.pie}>{RevenuePie(items, revenuePieDate)}</Paper>
-        </Grid>
+          <Grid item xs={12} sm={12} md={6} xl={6}>
+            <FormControl
+              className={classes.formControl}
+              autoFocus
+              margin="dense"
+            >
+              <InputLabel htmlFor="age-native-simple">Range</InputLabel>
+              <Select
+                native
+                value={salesPieDate}
+                onChange={(e) => {
+                  setsalesPieDate(e.target.value);
+                }}
+              >
+                <option value={1}>1 Day</option>
+                <option value={7}>7 Days</option>
+                <option value={30}>30 Days</option>
+                <option value={90}>90 Days</option>
+                <option value={365}>1 Year</option>
+                <option value={999999}>All Time</option>
+              </Select>
+            </FormControl>
+            <Paper className={classes.pie}>
+              {SoldPie(items, salesPieDate)}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={6} xl={6}>
+            <FormControl
+              className={classes.formControl}
+              autoFocus
+              margin="dense"
+            >
+              <InputLabel htmlFor="age-native-simple">Range</InputLabel>
+              <Select
+                native
+                value={revenuePieDate}
+                onChange={(e) => {
+                  setrevenuePieDate(e.target.value);
+                }}
+              >
+                <option value={1}>1 Day</option>
+                <option value={7}>7 Days</option>
+                <option value={30}>30 Days</option>
+                <option value={90}>90 Days</option>
+                <option value={365}>1 Year</option>
+                <option value={999999}>All Time</option>
+              </Select>
+            </FormControl>
+            <Paper className={classes.pie}>
+              {RevenuePie(items, revenuePieDate)}
+            </Paper>
+          </Grid>
         </Grid>
       </Card>
     </div>
