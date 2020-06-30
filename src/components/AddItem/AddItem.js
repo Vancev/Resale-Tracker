@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 // @material-ui/core components
-import { makeStyles } from "@material-ui/core/styles";
 import InputLabel from "@material-ui/core/InputLabel";
 // core components
-import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 import { FormControl } from "@material-ui/core";
@@ -20,7 +18,6 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import Checkbox from "@material-ui/core/Checkbox";
 import { CalculateProfit } from "../../functions/CalculateProfit";
 
-//TODO Add createable select to TableList
 export function AddItem(itemAdded) {
   const [cost, setCost] = useState("");
   const [boughtFrom, setBoughtFrom] = useState("");
@@ -62,7 +59,7 @@ export function AddItem(itemAdded) {
     setProfit(0);
     setCostError();
     setNameError();
-    setSoldCostError()
+    setSoldCostError();
   }
 
   //Array of all possible selling platforms
@@ -101,48 +98,6 @@ export function AddItem(itemAdded) {
       });
   }, []);
 
-  //In future for users to add custom platforms
-  // useEffect(() => {
-  //   firestore
-  //   .collection("Users")
-  //   .doc(user.uid)
-  //   .collection("SoldLocation")
-  //     .get()
-  //     .then((data) => {
-  //       let tempItems = [];
-  //       data.forEach((doc) => {
-  //         let item = {
-  //           label: doc.data().location,
-  //           value: doc.data().location,
-  //         };
-  //         tempItems.push(item);
-  //       });
-  //       console.log(tempItems);
-  //       setSoldPlatforms(tempItems);
-  //     });
-  // }, [addedPlatform]);
-
-  // function setNewPlatform(newPlatform) {
-  //   if (newPlatform !== "") {
-  //     //Add new item to firestore
-  //     firestore
-  //     .collection("Users")
-  //     .doc(user.uid)
-  //     .collection("SoldLocation")
-  //       .add({
-  //         location: newPlatform,
-  //       })
-  //       .then(function (docRef) {
-  //         //TODO: Use this ID to delete documents. Find out where to store ID.
-  //         console.log("Document written with ID: ", docRef.id);
-  //       })
-  //       .catch(function (error) {
-  //         console.error("Error adding document: ", error);
-  //       });
-  //   }
-  //   setAddedPlatform(true);
-  // }
-
   function addItem(e) {
     let soldBool = null;
     if (sold === "true") {
@@ -153,6 +108,7 @@ export function AddItem(itemAdded) {
       soldBool = null;
     }
     let inputError = false;
+
     if (name == "") {
       setNameError("Can not be empty");
       inputError = true;
@@ -162,11 +118,12 @@ export function AddItem(itemAdded) {
       inputError = true;
     }
     let sellingPlatform = soldPlatform;
-    if(Object.keys(soldPlatform).length === 0){
-      sellingPlatform = "Not Specified"
-      console.log("Others")
+
+    //if "Sold Platform" field was left empty
+    if (Object.keys(soldPlatform).length === 0) {
+      sellingPlatform = "Not Specified";
     }
-    console.log(sellingPlatform)
+
     //if No unput errors detected
     if (!inputError) {
       /* Send the item to Firebase */
@@ -182,7 +139,6 @@ export function AddItem(itemAdded) {
             itemName: name,
           })
           .then(function (docRef) {
-            //TODO: Use this ID to delete documents. Find out where to store ID.
             console.log("Document written with ID: ", docRef.id);
             itemAdded.itemAdded(docRef.id);
             toast.success("Item was added");
@@ -209,7 +165,6 @@ export function AddItem(itemAdded) {
         );
         let today = new Date();
         let date = new Date().setDate(today.getDate());
-        //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
         if (sellingPlatform === "Ebay") {
           firestore
             .collection("Users")
@@ -231,7 +186,6 @@ export function AddItem(itemAdded) {
               profit: profit,
             })
             .then(function (docRef) {
-              //TODO: Use this ID to delete documents. Find out where to store ID.
               console.log("Document written with ID: ", docRef.id);
               itemAdded.itemAdded(docRef.id);
               toast.success("Item was added");
@@ -259,7 +213,6 @@ export function AddItem(itemAdded) {
               profit: profit,
             })
             .then(function (docRef) {
-              //TODO: Use this ID to delete documents. Find out where to store ID.
               console.log("Document written with ID: ", docRef.id);
               itemAdded.itemAdded(docRef.id);
               toast.success("Item was added");
@@ -411,10 +364,6 @@ export function AddItem(itemAdded) {
                           //isClearable
                           onChange={(opt, meta) => {
                             setEbayCategory(opt.value);
-                            // if (meta.action === "create-option") {
-                            //   setNewPlatform(opt.value);
-                            //   console.log(opt);
-                            // }
                           }}
                         />
                         <FormControl

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // core components
-
 import { firestore } from "../../firebase";
 import MaterialTable from "material-table";
 import Button from "@material-ui/core/Button";
@@ -24,12 +23,11 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Checkbox from "@material-ui/core/Checkbox";
 import { CalculateProfit } from "../../functions/CalculateProfit";
-import {AddItem} from "../AddItem/AddItem"
+import { AddItem } from "../AddItem/AddItem";
 import Grid from "@material-ui/core/Grid";
 import useStyles from "./ViewAll.style";
 import Paper from "@material-ui/core/Paper";
-import clsx from 'clsx';
-
+import clsx from "clsx";
 
 export default function TableList() {
   const user = useContext(UserContext);
@@ -54,7 +52,7 @@ export default function TableList() {
   const [shippingCost, setShippingCost] = useState(["", false]);
   const [soldPlatform, setSoldPlatform] = useState(["", false]);
   const [id, setID] = useState("");
-  const [soldDate, setSoldDate] = useState("")
+  const [soldDate, setSoldDate] = useState("");
   const [profit, setProfit] = React.useState([0, false]);
 
   //Platforms to display in the "Platform" dropdown
@@ -116,18 +114,6 @@ export default function TableList() {
         data.forEach((doc) => {
           let item = doc.data();
           item["id"] = doc.id;
-          //   let item = {
-          //     name: doc.data().itemName,
-          //     bought: doc.data().boughtFrom,
-          //     cost: doc.data().itemCost,
-          //     sold: doc.data().Sold,
-          //     profit: doc.data().profit,
-          //     soldPlatform: doc.data().soldPlatform,
-          //     soldCost: doc.data().soldCost,
-          //     shippingCost: doc.data().shippingCost,
-          //     buyerShipping: doc.data().buyerShipping,
-          //     id: doc.id,
-          //   };
           tempItems.push(item);
         });
         setItems(tempItems);
@@ -163,26 +149,6 @@ export default function TableList() {
       });
   }, []);
 
-  //   useEffect(() => {
-  //     firestore
-  //       .collection("Users")
-  //       .doc(user.uid)
-  //       .collection("SoldLocation")
-  //       .get()
-  //       .then((data) => {
-  //         let tempItems = [];
-  //         data.forEach((doc) => {
-  //           let item = {
-  //             label: doc.data().location,
-  //             value: doc.data().location,
-  //           };
-  //           tempItems.push(item);
-  //         });
-  //         console.log(tempItems);
-  //         setSoldPlatforms(tempItems);
-  //       });
-  //   }, [addedPlatform]);
-
   //Update state after an item has been deleted or modified
   useEffect(() => {
     firestore
@@ -192,10 +158,10 @@ export default function TableList() {
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added" && change.doc.id === added) {
-               let item = change.doc.data();
-               item["id"] = change.doc.id;
-             setItems([...items, item]);
-             setAdded('')
+            let item = change.doc.data();
+            item["id"] = change.doc.id;
+            setItems([...items, item]);
+            setAdded("");
           }
           if (change.type === "removed" && change.doc.id === toDelete) {
             const item = items.filter((item) => item.id !== change.doc.id);
@@ -255,13 +221,11 @@ export default function TableList() {
             });
             setItems(tempItems);
           }
-          //TODO: Update state if change is modified
         });
       });
     setDelete("");
   }, [toDelete, modified, profit, added]);
 
-  //TODO: Allow manual changing of profit
   const handleClickOpen = (rowData) => {
     setName([rowData.itemName, false]);
     setCost([rowData.itemCost, false]);
@@ -270,14 +234,12 @@ export default function TableList() {
     setSoldCost([rowData.soldCost, false]);
     setBuyerShipping([rowData.buyerShipping, false]);
     setShippingCost([rowData.shippingCost, false]);
-    //SoldPlatform has data of just "Platform" and also has data of object of all fees. Fix to
-    //have one or the other. Possibly make a new var for only platforma and another for fees
     setSoldPlatform([rowData.soldPlatform, false]);
     setProfit([rowData.profit, false]);
     setEbayOther([rowData.ebayOther, false]);
     setEbayCategory([rowData.ebayCategory, false]);
     setAdRate([rowData.adRate, false]);
-    setSoldDate(rowData.soldDate)
+    setSoldDate(rowData.soldDate);
     setID(rowData.id);
     setOpen(true);
   };
@@ -306,11 +268,10 @@ export default function TableList() {
       setOpen(false);
     } else {
       //If item was changed from unsold to sold, update the sold date
-      if(sold[1] == true){
-        let today = new Date()
-        let date = new Date().setDate(today.getDate())
-        //let date = (today.getMonth() + 1) + '-' + (today.getDate()) + '-' + (today.getFullYear());
-        setSoldDate(date)
+      if (sold[1] == true) {
+        let today = new Date();
+        let date = new Date().setDate(today.getDate());
+        setSoldDate(date);
       }
       let soldBool = null;
       //converts sold from string to bool
@@ -342,7 +303,6 @@ export default function TableList() {
           })
           .catch(function (error) {
             console.error("Error adding document: ", error);
-            //toast.error("Error adding document: ", error);
           });
       }
       if (soldBool === true) {
@@ -389,12 +349,9 @@ export default function TableList() {
             })
             .then(function (docRef) {
               console.log("Document updated");
-              //toast.success("Item was added");
-              //resetItem();
             })
             .catch(function (error) {
               console.error("Error adding document: ", error);
-              //toast.error("Error adding document: ", error);
             });
         } else {
           firestore
@@ -416,12 +373,9 @@ export default function TableList() {
             })
             .then(function (docRef) {
               console.log("Document updated");
-              //toast.success("Item was added");
-              //resetItem();
             })
             .catch(function (error) {
               console.error("Error adding document: ", error);
-              //toast.error("Error adding document: ", error);
             });
         }
       }
@@ -435,60 +389,39 @@ export default function TableList() {
       true,
     ]);
   };
-  //   function setNewPlatform(newPlatform) {
-  //     if (newPlatform !== "") {
-  //       //Add new item to firestore
-  //       firestore
-  //         .collection("Users")
-  //         .doc(user.uid)
-  //         .collection("SoldLocation")
-  //         .add({
-  //           location: newPlatform,
-  //         })
-  //         .then(function (docRef) {
-  //           //TODO: Use this ID to delete documents. Find out where to store ID.
-  //           console.log("Document written with ID: ", docRef.id);
-  //         })
-  //         .catch(function (error) {
-  //           console.error("Error adding document: ", error);
-  //         });
-  //     }
-  //     setAddedPlatform(true);
-  //   }
-
 
   const add = (docRef) => {
-    setAdded(docRef)
-  }
+    setAdded(docRef);
+  };
 
   const classes = useStyles();
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={3} md={3} xl={2}>
-      <Paper className={classes.paper}>
-        <AddItem itemAdded = {add}/>
-        </Paper>
-        </Grid>
-        <Grid item xs={12} sm={9} md={9} xl={10}>
         <Paper className={classes.paper}>
-        <MaterialTable
-          title="All Items"
-          columns={state.columns}
-          data={items}
-          onRowClick={(event, rowData) => handleClickOpen(rowData)}
-          editable={{
-            onRowDelete: (oldData) =>
-              new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve();
-                  setDelete(oldData.id);
-                  deleteItem(oldData);
-                }, 600);
-              }),
-          }}
-        />
+          <AddItem itemAdded={add} />
         </Paper>
-        </Grid>
+      </Grid>
+      <Grid item xs={12} sm={9} md={9} xl={10}>
+        <Paper className={classes.paper}>
+          <MaterialTable
+            title="All Items"
+            columns={state.columns}
+            data={items}
+            onRowClick={(event, rowData) => handleClickOpen(rowData)}
+            editable={{
+              onRowDelete: (oldData) =>
+                new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve();
+                    setDelete(oldData.id);
+                    deleteItem(oldData);
+                  }, 600);
+                }),
+            }}
+          />
+        </Paper>
+      </Grid>
       <Dialog
         open={open}
         onClose={handleClose}
@@ -556,13 +489,8 @@ export default function TableList() {
               <PlatformSelect
                 options={soldPlatforms}
                 placeholder={soldPlatform[0] || "Selling Platform"}
-                //isClearable
                 onChange={(opt, meta) => {
                   setSoldPlatform([opt.value, true]);
-                  // if (meta.action === "create-option") {
-                  //   setNewPlatform(opt.value);
-                  //   console.log(opt);
-                  // }
                 }}
               />
               <TextField
@@ -613,13 +541,8 @@ export default function TableList() {
                   <PlatformSelect
                     options={ebayCategories}
                     placeholder={ebayCategory[0] || "Ebay Item Category"}
-                    //isClearable
                     onChange={(opt, meta) => {
                       setEbayCategory([opt.value, true]);
-                      // if (meta.action === "create-option") {
-                      //   setNewPlatform(opt.value);
-                      //   console.log(opt);
-                      // }
                     }}
                   />
                   <FormControl
