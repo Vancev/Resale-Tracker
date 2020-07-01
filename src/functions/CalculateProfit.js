@@ -12,6 +12,15 @@ export function CalculateProfit(
   adRate
 ) {
   var profit;
+  console.log(soldPlatform,
+    fees,
+    soldCost,
+    cost,
+    shippingCost,
+    buyerShipping,
+    ebayCategory,
+    ebayOther,
+    adRate)
   switch (soldPlatform) {
     case "Mecari":
       let fee = parseFloat(soldCost) * fees.fee.platformPercentFee * 0.01;
@@ -68,6 +77,18 @@ export function CalculateProfit(
         parseFloat(ebayFee || 0) -
         parseFloat(shippingCost || 0) +
         parseFloat(buyerShipping || 0);
+      console.log(profit);
+      break;
+    case "OfferUp - Shipped":
+      let offerUpFee = parseFloat(soldCost) * fees.fee.platformPercentFee * 0.01;
+      //offerUpFee = Math.max(offerUpFee, fees.fee.minumumFee);
+      console.log(offerUpFee, Math.max(offerUpFee, fees.fee.minumumFee));
+      profit =
+        parseFloat(soldCost || 0) -
+        parseFloat(cost || 0) -
+        parseFloat(shippingCost || 0) +
+        parseFloat(buyerShipping || 0) -
+        parseFloat(offerUpFee || 0);
       console.log(profit);
       break;
     case "OfferUp - Local" || "Craigslist" || "Local - Other":

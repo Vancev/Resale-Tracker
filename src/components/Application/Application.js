@@ -5,6 +5,7 @@ import ProfilePage from "../ProfilePage/ProfilePage";
 import { UserContext } from "../../providors/UserProvider";
 import ViewAll from "../ViewAll/ViewAll";
 import Expenses from "../Expenses/Expenses";
+import Estimate from "../Estimate/Estimate";
 import Sidebar from "../Sidebar/Sidebar";
 
 function Application() {
@@ -23,6 +24,8 @@ function Application() {
         <ProtectedRoute component={ProfilePage} path="/" />
         <ProtectedRoute component={ViewAll} path="/dashboard/viewall" />
         <ProtectedRoute component={Expenses} path="/dashboard/addexpense" />
+        <ProtectedRoute component={Estimate} path="/dashboard/estimate/:platform" />
+        <ProtectedRoute component={Estimate} path="/dashboard/estimate/" />
       </Router>
     </div>
   );
