@@ -12,15 +12,6 @@ export function CalculateProfit(
   adRate
 ) {
   var profit;
-  console.log(soldPlatform,
-    fees,
-    soldCost,
-    cost,
-    shippingCost,
-    buyerShipping,
-    ebayCategory,
-    ebayOther,
-    adRate)
   switch (soldPlatform) {
     case "Mecari":
       let fee = parseFloat(soldCost) * fees.fee.platformPercentFee * 0.01;
