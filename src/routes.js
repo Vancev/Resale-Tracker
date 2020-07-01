@@ -3,6 +3,7 @@ import ViewAll from "./components/ViewAll/ViewAll"
 import Application from "./components/Application/Application"
 import Expenses from "./components/Expenses/Expenses"
 import { Home, ContentPaste, Notifications, AccountCircle } from '@material-ui/icons';
+import Estimate from "./components/Estimate/Estimate";
 
 const Routes = [
     // {
@@ -32,6 +33,13 @@ const Routes = [
       navbarName: 'Add Expenses',
       icon: Home,
       component: Expenses
+    },
+    {
+      path: '/dashboard/estimate',
+      sidebarName: 'Estimate Expenses',
+      navbarName: 'Estimate Expenses',
+      icon: Home,
+      component: Estimate
     },
   ];
   
