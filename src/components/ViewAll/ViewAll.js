@@ -401,6 +401,15 @@ export default function TableList() {
         <Paper className={classes.paper}>
           <AddItem itemAdded={add} />
         </Paper>
+        <div>
+            <a
+              target="_self"
+              href="
+https://auth.ebay.com/oauth2/authorize?client_id=VanceVes-itemTrac-PRD-323495a50-601a5cd9&response_type=code&redirect_uri=Vance_Vescogni-VanceVes-itemTr-mdfozt&scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly https://api.ebay.com/oauth/api_scope/sell.finances https://api.ebay.com/oauth/api_scope/sell.payment.dispute https://api.ebay.com/oauth/api_scope/commerce.identity.readonly"
+            >
+              Connect with Ebay
+            </a>
+          </div>
       </Grid>
       <Grid item xs={12} sm={9} md={9} xl={10}>
         <Paper className={classes.paper}>
