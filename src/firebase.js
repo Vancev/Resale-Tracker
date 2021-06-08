@@ -4,7 +4,7 @@ import "firebase/firestore";
 import { functions } from "firebase";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAQv1RLlMCyDU298gx8sMmRtTxaRe6cw9s",
+  apiKey: process.env.REACT_APP_FIREBASE_KEY,
   authDomain: "profit-tracker-43746.firebaseapp.com",
   databaseURL: "https://profit-tracker-43746.firebaseio.com",
   projectId: "profit-tracker-43746",

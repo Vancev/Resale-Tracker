@@ -6,6 +6,8 @@ import { UserContext } from "../../providors/UserProvider";
 import ViewAll from "../ViewAll/ViewAll";
 import Expenses from "../Expenses/Expenses";
 import Estimate from "../Estimate/Estimate";
+import ConnectEbay from "../Ebay/ConnectEbay"
+import ManageEbay from "../Ebay/ManageEbay"
 import Sidebar from "../Sidebar/Sidebar";
 
 function Application() {
@@ -26,6 +28,8 @@ function Application() {
         <ProtectedRoute component={Expenses} path="/dashboard/addexpense" />
         <ProtectedRoute component={Estimate} path="/dashboard/estimate/:platform" />
         <ProtectedRoute component={Estimate} path="/dashboard/estimate/" />
+        <ProtectedRoute component={ConnectEbay} path="/dashboard/connectebay/" />
+        <ProtectedRoute component={ManageEbay} path="/dashboard/manageebay/" />
       </Router>
     </div>
   );
