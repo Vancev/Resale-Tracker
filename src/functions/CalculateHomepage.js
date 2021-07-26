@@ -8,7 +8,9 @@ export function Profit(items, expenses, startDate, endDate) {
 
   let profit = 0;
   items.map((item) => {
+    console.log(item)
     if (toDate > item.soldDate && item.soldDate > fromDate) {
+      console.log("YYU")
       profit = profit + parseFloat(item.profit);
     }
   });

@@ -3,12 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import useStyles from "./ManageEbay.style";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
-import { Profit, ROI } from "../../functions/CalculateHomepage";
-import { MonthlyProfit, SoldPie, RevenuePie } from "../../functions/Graphs";
 import { firestore } from "../../firebase";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -16,80 +11,185 @@ import Select from "@material-ui/core/Select";
 import MaterialTable from "material-table";
 import { UserContext } from "../../providors/UserProvider";
 
-//TODO: Figure out decimal, make update changes perseist(Send to firestore), renew with refresh token
-//Change to load in from fire instead of API
+//TODO: does not add old data when switching from 30 to 90 day view
+//doesnt use refresh token when logging in-not checking tokens
 export default function ManageEbay(props) {
   const user = useContext(UserContext);
 
   const classes = useStyles();
 
   //All sale ID's from the Firestore
-  const [ids, setIds] = useState([]);
-
-  const [orders, setOrders] = useState("no orders");
+  const [ids, setIds] = useState(null);
+  //npm run serve
   const [orderData, setOrderData] = useState([]);
-  const [dateRange, setDateRange] = useState(7);
+  const [dateRange, setDateRange] = useState(30);
   const [offset, setOffset] = useState(0);
+  const [tableLoading, setTableLoading] = useState(true);
+  const [lastAddedToFirebase, setLastAddedToFirebase] = useState(0);
+  const [firstAddedToFirebase, setFirstAddedToFirebase] = useState(0);
 
   const columns = [
     { title: "Name", field: "name" },
     { title: "Sold Price", field: "soldPrice", type: "currency" },
-    { title: "Cost", field: "cost", type: "currency" },
+    { title: "Your Cost", field: "cost", type: "currency" },
     { title: "Revenue", field: "revenue", type: "currency" },
     { title: "After Fees", field: "afterFees", type: "currency" },
-    { title: "Shipping Cost", field: "shippingReceived", type: "currency" },
+    { title: "Shipping Cost", field: "shippingCost", type: "currency" },
     { title: "Profit", field: "profit", type: "currency" },
   ];
 
   useEffect(() => {
-      //Add order ID's to list to determine if there have been any new sales.
-      firestore
+    let orderIdList = [];
+
+    var date = new Date();
+    //date range in milisecond ticks
+    var currentDate = date.getTime();
+    var tickOffset = currentDate - dateRange * 86400000;
+
+    //check firestore for orders within the time range
+    firestore
       .collection("Users")
       .doc(user.uid)
       .collection("Items")
+      .where("soldDate", ">=", tickOffset)
+      .orderBy("soldDate", "desc")
       .get()
       .then((data) => {
-        let orderIdList = [];
-        data.forEach((doc) => {
-          if(doc.data().orderId){
-            orderIdList.push(doc.data().orderId)
-            //console.log(doc.data().orderId)
-          }
-        });
+        if (data.docs.length > 0) {
+          setLastAddedToFirebase(data.docs[0].data().soldDate);
+          setFirstAddedToFirebase(data.docs[data.docs.length-1].data().soldDate);
+          console.log(data.docs[0].data().itemName);
+          data.forEach((doc) => {
+            if (doc.data().orderId) {
+              orderIdList.push(doc.data().orderId);
+            }
+            let order = {
+              name: doc.data().itemName,
+              revenue: doc.data().revenue,
+              shippingReceived: doc.data().buyerShipping,
+              shippingCost: doc.data().shippingCost,
+              soldPrice: doc.data().soldCost,
+              afterFees: doc.data().afterFees,
+              orderId: doc.data().orderId,
+              date: doc.data().soldDate,
+              cost: doc.data().itemCost,
+              profit: doc.data().profit,
+            };
+            setTableLoading(false);
+            setOrderData((prevState) => [...prevState, order]);
+          });
+        }
+        else{
+          setTableLoading(false)
+        }
+      })
+      .then(() => {
+        console.log(firstAddedToFirebase)
+        console.log(lastAddedToFirebase)
+        console.log(orderIdList);
         setIds(orderIdList);
       });
-  }, []);
-
-
+  }, [dateRange]);
 
   useEffect(() => {
     console.log(props);
+    if (ids == null) {
+      console.log("still loading");
+    } else {
+      console.log(ids);
+      var currentDate = new Date();
 
-    if (props.location.state) {
-      if (props.location.state.accessToken) {
-        var expDate = new Date(props.location.state.time);
-        var mintDate = new Date(props.location.state.time);
-        var currentTime = new Date()
-        expDate.setSeconds(
-          expDate.getSeconds() + props.location.state.expires_in
-        );
-        console.log(expDate, mintDate);
-        if (currentTime > expDate) {
-          console.log("Expired");
-          //refresh token request
-        } else {
-          console.log("Not Expired");
-          setAccessToken(props.location.state.accessToken);
+      //if no firestore tokens, or all expired
+      if (props.location.state) {
+        //if there are tokens in the state
+        if (props.location.state.accessToken) {
+          var expDate = new Date(props.location.state.time);
+          var currentTime = new Date();
+          expDate.setSeconds(
+            expDate.getSeconds() + props.location.state.expires_in
+          );
+
+          //send tokens to firestore
+          firestore
+            .collection("Users")
+            .doc(user.uid)
+            .collection("Tokens")
+            .doc("ebayToken")
+            .set({
+              accessToken: props.location.state.accessToken,
+              expires_in: props.location.state.expires_in * 100,
+              refresh_token: props.location.state.refresh_token,
+              refresh_token_expires_in:
+                props.location.state.refresh_token_expires_in * 100,
+              access_mint_time: currentDate.getTime(),
+              refresh_mint_time: currentDate.getTime(),
+            })
+            .then(function (docRef) {
+              console.log("Document written with ID: ", docRef);
+            })
+            .catch(function (error) {
+              console.error("Error adding document: ", error);
+            });
+
+          if (currentTime > expDate) {
+            console.log("Expired");
+            //refresh token request
+          } else {
+            console.log("Not Expired");
+            setAccessToken(props.location.state.accessToken);
+          }
+        }
+        //no tokens in state, check if in firestore
+        else {
+          //get tokens from firestore
+          firestore
+            .collection("Users")
+            .doc(user.uid)
+            .collection("Tokens")
+            .get()
+            .then((data) => {
+              data.forEach((doc) => {
+                //token not expired
+                if (
+                  doc.data().access_mint_time + doc.data().expires_in >
+                  currentDate.getTime()
+                ) {
+                  setAccessToken(doc.data().accessToken);
+                  console.log("TOKEN FROM FIRESTORE");
+                } else {
+                  //access token expired, refresh is not expired
+                  if (
+                    doc.data().refresh_mint_time +
+                      doc.data().refresh_token_expires_in >
+                    currentDate.getTime()
+                  ) {
+                    refreshToken(doc.data().refresh_token);
+                    console.log("REFRESH FROM FIRESTORE");
+                  } else {
+                    //both tokens expired. User needs to reauthorize
+                  }
+                }
+              });
+            });
         }
       }
     }
-  }, [dateRange, offset]);
+  }, [ids, offset]);
 
   //Use access token to access orders
   function setAccessToken(accessToken) {
-    var date = new Date();
-    let startDate = new Date();
-    startDate.setDate(date.getDate() - dateRange);
+    console.log(lastAddedToFirebase);
+    console.log(firstAddedToFirebase);
+    var startDate;
+    if (lastAddedToFirebase == 0) {
+      var date = new Date();
+      startDate = new Date();
+      startDate.setDate(date.getDate() - dateRange);
+    } else {
+      startDate = new Date(lastAddedToFirebase);
+      console.log(lastAddedToFirebase);
+    }
+    console.log(startDate.toISOString());
 
     fetch(
       "http://localhost:3001/api/getOrders?auth=" +
@@ -104,9 +204,47 @@ export default function ManageEbay(props) {
     )
       .then((response) => response.json())
       .then((result) => {
-        console.log(result);
-        setOrders(result);
-        parseJson(result);
+        if (result.orders.length > 0) {
+          parseJson(result);
+        } else {
+          console.log("no new orders");
+        }
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+  }
+
+  function refreshToken(token) {
+    fetch(
+      "http://localhost:3001/api/refresh?token=" + encodeURIComponent(token),
+      {
+        method: "GET",
+      }
+    )
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result.access_token);
+        var currentDate = new Date();
+        //send tokens to firestore
+        firestore
+          .collection("Users")
+          .doc(user.uid)
+          .collection("Tokens")
+          .doc("ebayToken")
+          .update({
+            accessToken: result.access_token,
+            expires_in: result.expires_in * 100,
+            access_mint_time: currentDate.getTime(),
+          })
+          .then(function (docRef) {
+            console.log("Document updated");
+          })
+          .catch(function (error) {
+            console.error("Error adding document: ", error);
+          });
+
+        setAccessToken(result.access_token);
       })
       .catch((error) => {
         console.log("error", error);
@@ -119,55 +257,59 @@ export default function ManageEbay(props) {
     var sales = data.orders;
     console.log(sales);
     sales.map((item) => {
-      //console.log(item);
-      let order = {
-        name: item.lineItems[0].title,
-        revenue: item.lineItems[0].total.value,
-        shippingReceived: item.lineItems[0].deliveryCost.shippingCost.value,
-        soldPrice: item.lineItems[0].lineItemCost.value,
-        afterFees: item.paymentSummary.totalDueSeller.value,
-        orderId: item.orderId,
-        date: item.creationDate,
-        cost: 0,
-        profit: (
-          item.paymentSummary.totalDueSeller.value -
-          item.lineItems[0].deliveryCost.shippingCost.value
-        ).toFixed(2),
-      };
-
       //if order is not in firestore
-      if(ids.indexOf(item.orderId) == -1){
-         console.log("NOT IN FIRESTORE", order.name)
+      if (ids.indexOf(item.orderId) == -1) {
+        console.log("NOT IN FIRESTORE", ids);
+
+        //convert date to ticks
+        var date = new Date(item.creationDate);
+
+        //add order data to object
+        let order = {
+          name: item.lineItems[0].title,
+          revenue: item.lineItems[0].total.value,
+          shippingReceived: item.lineItems[0].deliveryCost.shippingCost.value,
+          shippingCost: item.lineItems[0].deliveryCost.shippingCost.value,
+          soldPrice: item.lineItems[0].lineItemCost.value,
+          afterFees: item.paymentSummary.totalDueSeller.value,
+          orderId: item.orderId,
+          date: date.getTime(),
+          cost: 0,
+          profit: (
+            item.paymentSummary.totalDueSeller.value -
+            item.lineItems[0].deliveryCost.shippingCost.value
+          ).toFixed(2),
+        };
+
         //Add sold item to firestore
         firestore
           .collection("Users")
           .doc(user.uid)
-          .collection("Items").
-          doc(order.orderId)
+          .collection("Items")
+          .doc(order.orderId)
           .set({
             Sold: true,
-            cost: order.cost || 0,
-            name: order.name,
+            itemCost: order.cost || 0,
+            itemName: order.name,
             revenue: order.revenue,
-            shippingReceived: order.shippingReceived,
-            soldPrice: order.soldPrice,
+            buyerShipping: order.shippingReceived,
+            shippingCost: order.shippingCost,
+            soldCost: order.soldPrice,
             afterFees: order.afterFees,
             orderId: order.orderId,
-            orderDate: order.date,
-            profit: order.profit
-
+            soldDate: order.date,
+            soldPlatform: "Ebay",
+            profit: order.profit,
           })
           .then(function (docRef) {
-            console.log("Document written with ID: ", docRef.id);
-            order = {...order, fireID: docRef.id}
-            console.log(order)
+            console.log("Document written with ID: ", order.orderId);
           })
           .catch(function (error) {
             console.error("Error adding document: ", error);
           });
+        setTableLoading(false);
+        setOrderData((prevState) => [...prevState, order]);
       }
-      
-      setOrderData((prevState) => [...prevState, order]);
     });
     if (data.next) {
       setOffset(offset + 50);
@@ -175,31 +317,41 @@ export default function ManageEbay(props) {
   }
 
   function updateDate(data) {
-    console.log(data)
+    //Update data in local state
+    var index = orderData.findIndex((order) => order.orderId == data.orderId);
+    //Only updating data the user can change
+    orderData[index].name = data.name;
+    orderData[index].shippingCost = data.shippingCost;
+    orderData[index].soldPrice = data.soldPrice;
+    orderData[index].afterFees = data.afterFees;
+    orderData[index].profit = data.profit;
+    orderData[index].cost = data.cost;
+    orderData[index].afterFees = data.afterFees;
+
+    //Update data in firestore
     firestore
-          .collection("Users")
-          .doc(user.uid)
-          .collection("Items")
-          .doc(data.orderId)
-          .update({
-            name: data.name,
-            revenue: data.revenue,
-            shippingReceived: data.shippingReceived,
-            soldPrice: data.soldPrice,
-            afterFees: data.afterFees,
-            orderId: data.orderId,
-            date: data.date,
-            cost: data.cost,
-            profit: data.profit,
-
-          })
-          .then(function (docRef) {
-            console.log("Document successfuly updated");
-          })
-          .catch(function (error) {
-            console.error("Error adding document: ", error);
-          });
-
+      .collection("Users")
+      .doc(user.uid)
+      .collection("Items")
+      .doc(data.orderId)
+      .update({
+        itemName: data.name,
+        revenue: data.revenue,
+        buyerShipping: data.shippingReceived,
+        shippingCost: data.shippingCost,
+        soldCost: data.soldPrice,
+        afterFees: data.afterFees,
+        orderId: data.orderId,
+        soldDate: data.date,
+        itemCost: data.cost,
+        profit: data.profit,
+      })
+      .then(function (docRef) {
+        console.log("Document successfuly updated");
+      })
+      .catch(function (error) {
+        console.error("Error adding document: ", error);
+      });
   }
   return (
     <div>
@@ -219,13 +371,15 @@ export default function ManageEbay(props) {
                   onChange={(e) => {
                     setDateRange(e.target.value);
                     setOrderData([]);
+                    setTableLoading(true);
+                    setLastAddedToFirebase(0);
                     setOffset(0);
                   }}
                 >
                   <option value={1}>1 Day</option>
                   <option value={7}>7 Days</option>
                   <option value={30}>30 Days</option>
-                  <option value={90}>90 Days</option>
+                  <option value={89}>90 Days</option>
                 </Select>
               </FormControl>
             </CardContent>
@@ -236,6 +390,7 @@ export default function ManageEbay(props) {
             title="All Items"
             columns={columns}
             data={orderData}
+            isLoading={tableLoading}
             editable={{
               onRowUpdate: (newData, oldData) =>
                 new Promise((resolve, reject) => {
@@ -246,10 +401,10 @@ export default function ManageEbay(props) {
                     dataUpdate[index].profit = (
                       dataUpdate[index].afterFees -
                       dataUpdate[index].cost -
-                      dataUpdate[index].shippingReceived
+                      dataUpdate[index].shippingCost
                     ).toFixed(2);
                     //setOrderData([...dataUpdate]);
-                    updateDate(dataUpdate[index])
+                    updateDate(dataUpdate[index]);
                     resolve();
                   }, 1000);
                 }),
