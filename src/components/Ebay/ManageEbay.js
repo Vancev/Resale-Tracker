@@ -390,7 +390,7 @@ export default function ManageEbay(props) {
           <MaterialTable
             title="All Items"
             columns={columns}
-            data={orderData}
+            data={[...orderData].sort((a,b) => b.soldDate - a.soldDate)}
             isLoading={tableLoading}
             editable={{
               onRowUpdate: (newData, oldData) =>
