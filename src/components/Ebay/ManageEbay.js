@@ -25,8 +25,9 @@ export default function ManageEbay(props) {
   const [dateRange, setDateRange] = useState(30);
   const [offset, setOffset] = useState(0);
   const [tableLoading, setTableLoading] = useState(true);
-  const [lastAddedToFirebase, setLastAddedToFirebase] = useState(0);
-  const [firstAddedToFirebase, setFirstAddedToFirebase] = useState(0);
+
+  //-1 => has not been set. 0 => date range changed, do not use.
+  const [lastAddedToFirebase, setLastAddedToFirebase] = useState(-1);
 
   const columns = [
     { title: "Name", field: "name" },
@@ -56,8 +57,10 @@ export default function ManageEbay(props) {
       .get()
       .then((data) => {
         if (data.docs.length > 0) {
-          setLastAddedToFirebase(data.docs[0].data().soldDate);
-          setFirstAddedToFirebase(data.docs[data.docs.length-1].data().soldDate);
+          if(lastAddedToFirebase == -1){
+            setLastAddedToFirebase(data.docs[0].data().soldDate);
+          }
+          //setFirstAddedToFirebase(data.docs[data.docs.length-1].data().soldDate);
           console.log(data.docs[0].data().itemName);
           data.forEach((doc) => {
             if (doc.data().orderId) {
@@ -84,7 +87,6 @@ export default function ManageEbay(props) {
         }
       })
       .then(() => {
-        console.log(firstAddedToFirebase)
         console.log(lastAddedToFirebase)
         console.log(orderIdList);
         setIds(orderIdList);
@@ -179,9 +181,8 @@ export default function ManageEbay(props) {
   //Use access token to access orders
   function setAccessToken(accessToken) {
     console.log(lastAddedToFirebase);
-    console.log(firstAddedToFirebase);
     var startDate;
-    if (lastAddedToFirebase == 0) {
+    if (lastAddedToFirebase < 1) {
       var date = new Date();
       startDate = new Date();
       startDate.setDate(date.getDate() - dateRange);
